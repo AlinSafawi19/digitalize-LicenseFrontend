@@ -1,0 +1,163 @@
+import { useState, memo, useCallback, useMemo } from 'react';
+import {
+  Box,
+  Card,
+  CardContent,
+  TextField,
+  Button,
+  Typography,
+  Alert,
+  InputAdornment,
+  IconButton,
+} from '@mui/material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '../../../store';
+import { useLoginMutation } from '../slice/authApi';
+import { setCredentials } from '../slice/authSlice';
+import { useNavigate } from 'react-router-dom';
+import { routes } from '../../../config/routes';
+import { LoginCredentials } from '../../../types/auth.types';
+
+const loginSchema = z.object({
+  username: z.string().min(3, 'Username must be at least 3 characters'),
+  password: z.string().min(1, 'Password is required'),
+});
+
+// Extract sx props to constants to prevent recreation on every render
+const containerBoxSx = {
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  minHeight: '100vh',
+  bgcolor: 'background.default',
+};
+const cardSx = { maxWidth: 400, width: '100%' };
+const cardContentSx = { p: 2 };
+const logoContainerSx = { display: 'flex', justifyContent: 'center', mb: 2 };
+const logoImageSx = { height: '50px', width: 'auto', display: 'block' };
+const subtitleTypographySx = { mb: 2.5 };
+const alertSx = { mb: 2.5 };
+const submitButtonSx = { mt: 1.5, mb: 1 };
+
+// Error message constant
+const DEFAULT_ERROR_MESSAGE = 'Login failed. Please check your credentials.';
+
+function LoginFormComponent() {
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
+  const [login, { isLoading }] = useLoginMutation();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginCredentials>({
+    resolver: zodResolver(loginSchema),
+  });
+
+  // Memoize the form submit handler to prevent recreation on every render
+  const onSubmit = useCallback(
+    async (data: LoginCredentials) => {
+      try {
+        setError(null);
+        const result = await login(data).unwrap();
+        dispatch(setCredentials(result));
+        navigate(routes.dashboard);
+      } catch (err: unknown) {
+        const error = err as { data?: { message?: string } };
+        setError(error?.data?.message || DEFAULT_ERROR_MESSAGE);
+      }
+    },
+    [login, dispatch, navigate]
+  );
+
+  // Memoize the toggle password handler to prevent recreation on every render
+  const handleTogglePassword = useCallback(() => {
+    setShowPassword((prev) => !prev);
+  }, []);
+
+  // Memoize InputProps to prevent recreation on every render
+  const passwordInputProps = useMemo(
+    () => ({
+      endAdornment: (
+        <InputAdornment position="end">
+          <IconButton onClick={handleTogglePassword} edge="end">
+            {showPassword ? <VisibilityOff /> : <Visibility />}
+          </IconButton>
+        </InputAdornment>
+      ),
+    }),
+    [showPassword, handleTogglePassword]
+  );
+
+  return (
+    <Box sx={containerBoxSx}>
+      <Card sx={cardSx}>
+        <CardContent sx={cardContentSx}>
+          <Box sx={logoContainerSx}>
+            <Box
+              component="img"
+              src="/logo.svg"
+              alt="DigitalizePOS Logo"
+              sx={logoImageSx}
+            />
+          </Box>
+          <Typography variant="h4" component="h1" gutterBottom align="center">
+            License Manager
+          </Typography>
+          <Typography variant="body2" color="text.secondary" align="center" sx={subtitleTypographySx}>
+            Sign in to continue
+          </Typography>
+
+          {error && (
+            <Alert severity="error" sx={alertSx}>
+              {error}
+            </Alert>
+          )}
+
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <TextField
+              {...register('username')}
+              label="Username"
+              type="text"
+              fullWidth
+              margin="normal"
+              error={!!errors.username}
+              helperText={errors.username?.message}
+              autoComplete="username"
+            />
+            <TextField
+              {...register('password')}
+              label="Password"
+              type={showPassword ? 'text' : 'password'}
+              fullWidth
+              margin="normal"
+              error={!!errors.password}
+              helperText={errors.password?.message}
+              autoComplete="current-password"
+              InputProps={passwordInputProps}
+            />
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={submitButtonSx}
+              disabled={isLoading}
+            >
+              {isLoading ? 'Signing in...' : 'Sign In'}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </Box>
+  );
+}
+
+// Memoize the component to prevent unnecessary re-renders when parent re-renders
+export const LoginForm = memo(LoginFormComponent);

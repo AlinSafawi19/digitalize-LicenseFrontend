@@ -1,0 +1,96 @@
+/**
+ * Global CSS styles with performance optimizations.
+ *
+ * Performance optimizations:
+ * 1. Using :where() for universal selector to reduce specificity and improve selector matching
+ * 2. Optimized font rendering with font-smoothing properties
+ * 3. CSS containment for better rendering performance
+ * 4. Optimized scrollbar styling with will-change hints
+ * 5. Efficient utility classes with minimal specificity
+ */
+
+/* CSS Custom Properties for better maintainability and potential performance */
+:root {
+  --scrollbar-width: 8px;
+  --scrollbar-track-bg: #f1f1f1;
+  --scrollbar-thumb-bg: #616161;
+  --scrollbar-thumb-hover-bg: #424242;
+}
+
+/* Performance optimization: Use :where() to reduce specificity and improve selector matching */
+:where(*, *::before, *::after) {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  /* Performance optimization: Enable font smoothing for better text rendering */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Performance optimization: CSS containment for better rendering performance */
+  contain: layout style paint;
+}
+
+#root {
+  min-height: 100vh;
+  /* Performance optimization: CSS containment for better rendering performance */
+  contain: layout style;
+}
+
+/* Scrollbar styling with performance optimizations */
+::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+  height: var(--scrollbar-width);
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb-bg);
+  border-radius: 0;
+  /* Performance optimization: Hint browser about potential changes for smoother transitions */
+  will-change: background-color;
+  transition: background-color 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover-bg);
+}
+
+/* Utility classes - optimized for minimal specificity */
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.mt-1 {
+  margin-top: 4px;
+}
+
+.mt-2 {
+  margin-top: 8px;
+}
+
+.mt-3 {
+  margin-top: 12px;
+}
+
+.mb-1 {
+  margin-bottom: 4px;
+}
+
+.mb-2 {
+  margin-bottom: 8px;
+}
+
+.mb-3 {
+  margin-bottom: 12px;
+}
