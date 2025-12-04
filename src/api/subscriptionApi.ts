@@ -31,6 +31,7 @@ interface SubscriptionWithLicense extends Subscription {
     licenseKey: string;
     customerName: string | null;
     locationName: string | null;
+    isFreeTrial: boolean;
   };
 }
 

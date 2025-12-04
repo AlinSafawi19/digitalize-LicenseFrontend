@@ -29,6 +29,7 @@ interface ActivationWithLicense extends Activation {
     licenseKey: string;
     locationName: string | null;
     locationAddress: string | null;
+    isFreeTrial: boolean;
   };
 }
 

@@ -28,6 +28,7 @@ interface PaymentWithLicense extends Payment {
     licenseKey: string;
     customerName: string | null;
     locationName: string | null;
+    isFreeTrial: boolean;
   };
 }
 
