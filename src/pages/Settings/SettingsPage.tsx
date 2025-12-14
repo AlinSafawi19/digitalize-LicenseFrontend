@@ -1,6 +1,8 @@
 import { Box, Typography, Paper, Grid, TextField, Button, Divider, Alert } from '@mui/material';
 import { Save as SaveIcon, Person as PersonIcon, Security as SecurityIcon } from '@mui/icons-material';
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import PhoneInput from 'react-phone-number-input';
+import 'react-phone-number-input/style.css';
 import {
   useGetUserInfoQuery,
   useUpdateProfileMutation,
@@ -16,7 +18,7 @@ const SUCCESS_UPDATED = 'Successfully updated';
 const ERROR_PROFILE_UPDATE = 'Failed to update profile. Please try again.';
 const ERROR_PASSWORD_CHANGE = 'Failed to change password. Please try again.';
 const ERROR_NO_CHANGES = 'No changes detected';
-const ERROR_INVALID_EMAIL = 'Please enter a valid email address';
+const ERROR_INVALID_PHONE = 'Please enter a valid phone number';
 const ERROR_ALL_FIELDS_REQUIRED = 'All password fields are required';
 const ERROR_PASSWORD_TOO_SHORT = 'New password must be at least 6 characters long';
 const ERROR_PASSWORDS_DONT_MATCH = 'New passwords do not match';
@@ -24,8 +26,8 @@ const ERROR_SAME_PASSWORD = 'New password must be different from current passwor
 const SUCCESS_PROFILE_UPDATED = 'Profile updated successfully!';
 const SUCCESS_PASSWORD_CHANGED = 'Password changed successfully!';
 
-// Email validation regex - extract to constant to avoid recreation
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Phone validation regex - extract to constant to avoid recreation
+const PHONE_REGEX = /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,9}$/;
 
 // Extract sx props to constants to prevent recreation on every render
 const titleTypographySx = { mb: 2.5 };
@@ -45,7 +47,7 @@ export const SettingsPage = () => {
     useChangePasswordMutation();
 
   // Profile state
-  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [name, setName] = useState('');
   const [profileSaved, setProfileSaved] = useState(false);
   const [profileErrorMsg, setProfileErrorMsg] = useState('');
@@ -63,7 +65,7 @@ export const SettingsPage = () => {
 
   useEffect(() => {
     if (userInfo) {
-      setEmail(userInfo.email || '');
+      setPhone(userInfo.phone || '');
       setName(userInfo.name || '');
     }
   }, [userInfo]);
@@ -104,24 +106,24 @@ export const SettingsPage = () => {
     setProfileSaved(false);
 
     // Validate that at least one field has changed
-    if (name === userInfo?.name && email === userInfo?.email) {
+    if (name === userInfo?.name && phone === userInfo?.phone) {
       setProfileErrorMsg(ERROR_NO_CHANGES);
       return;
     }
 
-    // Validate email format
-    if (email && !EMAIL_REGEX.test(email)) {
-      setProfileErrorMsg(ERROR_INVALID_EMAIL);
+    // Validate phone format
+    if (phone && !PHONE_REGEX.test(phone)) {
+      setProfileErrorMsg(ERROR_INVALID_PHONE);
       return;
     }
 
     try {
-      const updates: { username?: string; email?: string } = {};
+      const updates: { username?: string; phone?: string } = {};
       if (name && name !== userInfo?.name) {
         updates.username = name;
       }
-      if (email && email !== userInfo?.email) {
-        updates.email = email;
+      if (phone && phone !== userInfo?.phone) {
+        updates.phone = phone;
       }
 
       await updateProfile(updates).unwrap();
@@ -144,7 +146,7 @@ export const SettingsPage = () => {
       // Error is handled by useEffect
       console.error('Profile update error:', error);
     }
-  }, [name, email, userInfo, updateProfile, refetch]);
+  }, [name, phone, userInfo, updateProfile, refetch]);
 
   // Memoize handlePasswordChange to prevent recreation on every render
   const handlePasswordChange = useCallback(async () => {
@@ -205,8 +207,8 @@ export const SettingsPage = () => {
     setName(e.target.value);
   }, []);
 
-  const handleEmailChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setEmail(e.target.value);
+  const handlePhoneChange = useCallback((value: string | undefined) => {
+    setPhone(value || '');
   }, []);
 
   const handleCurrentPasswordChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -223,8 +225,8 @@ export const SettingsPage = () => {
 
   // Memoize disabled condition for profile save button
   const isProfileSaveDisabled = useMemo(
-    () => isUpdatingProfile || (name === userInfo?.name && email === userInfo?.email),
-    [isUpdatingProfile, name, email, userInfo?.name, userInfo?.email]
+    () => isUpdatingProfile || (name === userInfo?.name && phone === userInfo?.phone),
+    [isUpdatingProfile, name, phone, userInfo?.name, userInfo?.phone]
   );
 
   // Memoize disabled condition for password change button
@@ -265,15 +267,47 @@ export const SettingsPage = () => {
                 />
               </Grid>
               <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Email"
-                  value={email}
-                  onChange={handleEmailChange}
-                  variant="outlined"
-                  type="text"
-                  helperText="Your email address"
-                />
+                <Box>
+                  <Typography variant="body2" sx={{ mb: 1, fontSize: '14px', color: 'text.secondary' }}>
+                    Phone Number
+                  </Typography>
+                  <PhoneInput
+                    international
+                    defaultCountry="LB"
+                    value={phone}
+                    onChange={handlePhoneChange}
+                    className="mui-phone-input"
+                    style={{
+                      '--PhoneInputInput-height': '56px',
+                      '--PhoneInputInput-fontSize': '16px',
+                    } as React.CSSProperties}
+                  />
+                  <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '12px', mt: 0.5, display: 'block' }}>
+                    Your phone number
+                  </Typography>
+                  <style>{`
+                    .mui-phone-input {
+                      width: 100%;
+                    }
+                    .mui-phone-input .PhoneInputInput {
+                      width: 100%;
+                      height: 56px;
+                      padding: 16px 14px;
+                      font-size: 16px;
+                      border: 1px solid rgba(0, 0, 0, 0.23);
+                      border-radius: 4px;
+                      font-family: inherit;
+                    }
+                    .mui-phone-input .PhoneInputInput:focus {
+                      border-color: #1976d2;
+                      border-width: 2px;
+                      outline: none;
+                    }
+                    .mui-phone-input .PhoneInputCountry {
+                      margin-right: 8px;
+                    }
+                  `}</style>
+                </Box>
               </Grid>
               <Grid item xs={12}>
                 <Button

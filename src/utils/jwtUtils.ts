@@ -27,7 +27,7 @@ interface JWTPayload {
   iat?: number; // Issued at time
   id?: number;
   username?: string;
-  email?: string;
+  phone?: string;
   [key: string]: unknown;
 }
 

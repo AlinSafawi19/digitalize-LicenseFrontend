@@ -21,7 +21,7 @@ const DEFAULT_PRICE_PER_USER = 25;
 // Error messages as constants for consistency and potential i18n
 const ERROR_MESSAGES = {
   CUSTOMER_NAME_REQUIRED: 'Customer name is required',
-  INVALID_EMAIL: 'Invalid email address',
+  INVALID_PHONE: 'Invalid phone number',
   PRICE_MUST_BE_POSITIVE: 'Price must be positive',
   ANNUAL_PRICE_MUST_BE_POSITIVE: 'Annual price must be positive',
   PRICE_PER_USER_MUST_BE_POSITIVE: 'Price per user must be positive',
@@ -39,14 +39,14 @@ const ERROR_MESSAGES = {
  * - Type inference happens at compile time with no runtime overhead
  *
  * The schema validates:
- * - Customer information (name, email)
+ * - Customer information (name, phone)
  * - Pricing information (initial, annual, per-user)
  * - Location information (name, address)
  * - License flags (free trial)
  */
 export const licenseFormSchema = z.object({
   customerName: z.string().min(1, ERROR_MESSAGES.CUSTOMER_NAME_REQUIRED),
-  customerEmail: z.string().email(ERROR_MESSAGES.INVALID_EMAIL),
+  customerPhone: z.string().min(1, ERROR_MESSAGES.INVALID_PHONE).regex(/^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,9}$/, ERROR_MESSAGES.INVALID_PHONE),
   initialPrice: z.number().min(0, ERROR_MESSAGES.PRICE_MUST_BE_POSITIVE).default(DEFAULT_INITIAL_PRICE),
   annualPrice: z.number().min(0, ERROR_MESSAGES.ANNUAL_PRICE_MUST_BE_POSITIVE).default(DEFAULT_ANNUAL_PRICE),
   pricePerUser: z.number().min(0, ERROR_MESSAGES.PRICE_PER_USER_MUST_BE_POSITIVE).default(DEFAULT_PRICE_PER_USER),

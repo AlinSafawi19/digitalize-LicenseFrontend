@@ -23,7 +23,7 @@ export interface License {
   id: number;
   licenseKey: string;
   customerName: string | null;
-  customerEmail: string | null;
+  customerPhone: string | null;
   purchaseDate: string;
   initialPrice: number;
   pricePerUser: number;
@@ -73,7 +73,8 @@ export interface LicenseStatusInfo {
  */
 export interface CreateLicenseInput {
   customerName: string;
-  customerEmail: string;
+  customerPhone: string;
+  verificationToken?: string; // Required for phone verification
   initialPrice?: number;
   annualPrice?: number;
   pricePerUser?: number;
@@ -95,7 +96,7 @@ export interface CreateLicenseInput {
  */
 export interface UpdateLicenseInput {
   customerName?: string;
-  customerEmail?: string;
+  customerPhone?: string;
   locationName?: string;
   locationAddress?: string;
   status?: LicenseStatus;

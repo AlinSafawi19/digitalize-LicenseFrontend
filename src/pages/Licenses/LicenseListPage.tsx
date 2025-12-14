@@ -340,7 +340,7 @@ export const LicenseListPage = () => {
             <ViewIcon fontSize="small" />
           </IconButton>
         </Tooltip>
-        <Tooltip title="Edit license information (customer name, email, location, prices). This does not affect existing subscriptions or payments.">
+        <Tooltip title="Edit license information (customer name, phone, location, prices). This does not affect existing subscriptions or payments.">
           <IconButton size="small" onClick={() => handleEditLicense(row.id)}>
             <EditIcon fontSize="small" />
           </IconButton>
@@ -540,7 +540,7 @@ export const LicenseListPage = () => {
           <TextField
             fullWidth
             label="Search"
-            placeholder="Search by ID, license key, customer name, email, or branch/location"
+            placeholder="Search by ID, license key, customer name, phone, or branch/location"
             value={searchQuery}
             onChange={handleSearchChange}
             variant="outlined"

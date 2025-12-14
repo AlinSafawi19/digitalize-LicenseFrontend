@@ -17,14 +17,14 @@ export const authApi = baseApi.injectEndpoints({
           admin: {
             id: number;
             username: string;
-            email: string;
+            phone: string;
           };
         };
       }): AuthResponse => ({
         token: response.data.token,
         user: {
           id: response.data.admin.id,
-          email: response.data.admin.email,
+          phone: response.data.admin.phone,
           name: response.data.admin.username,
         },
       }),
@@ -37,14 +37,14 @@ export const authApi = baseApi.injectEndpoints({
       // Invalidate Auth tags to clear cached user info on logout
       invalidatesTags: ['Auth'],
     }),
-    getUserInfo: builder.query<{ email: string; name?: string }, void>({
+    getUserInfo: builder.query<{ phone: string; name?: string }, void>({
       query: () => '/admin/me',
       transformResponse: (response: {
         success: boolean;
         message: string;
-        data: { id: number; username: string; email: string };
+        data: { id: number; username: string; phone: string };
       }) => ({
-        email: response.data.email,
+        phone: response.data.phone,
         name: response.data.username,
       }),
       providesTags: ['Auth'],
@@ -53,8 +53,8 @@ export const authApi = baseApi.injectEndpoints({
       keepUnusedDataFor: 600,
     }),
     updateProfile: builder.mutation<
-      { email: string; name: string },
-      { username?: string; email?: string }
+      { phone: string; name: string },
+      { username?: string; phone?: string }
     >({
       query: (updates) => ({
         url: '/admin/profile',
@@ -64,9 +64,9 @@ export const authApi = baseApi.injectEndpoints({
       transformResponse: (response: {
         success: boolean;
         message: string;
-        data: { id: number; username: string; email: string };
+        data: { id: number; username: string; phone: string };
       }) => ({
-        email: response.data.email,
+        phone: response.data.phone,
         name: response.data.username,
       }),
       invalidatesTags: ['Auth'],

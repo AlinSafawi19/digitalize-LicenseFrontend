@@ -295,10 +295,10 @@ export const IncreaseUserLimitPage = () => {
               </Grid>
               <Grid item xs={12} md={6}>
                 <Typography variant="subtitle2" color="text.secondary">
-                  Customer Email
+                  Customer Phone
                 </Typography>
                 <Typography variant="body1" sx={bodyTypographySx}>
-                  {license.customerEmail || '-'}
+                  {license.customerPhone || '-'}
                 </Typography>
               </Grid>
               <Grid item xs={12} md={6}>

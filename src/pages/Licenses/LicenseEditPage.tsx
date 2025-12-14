@@ -86,7 +86,7 @@ export const LicenseEditPage = () => {
   const initialData = useMemo(
     () => ({
       customerName: license?.customerName || '',
-      customerEmail: license?.customerEmail || '',
+      customerPhone: license?.customerPhone || '',
       initialPrice: license ? Number(license.initialPrice) : 0,
       annualPrice:
         license?.subscriptions && license.subscriptions.length > 0
@@ -136,7 +136,7 @@ export const LicenseEditPage = () => {
         <Typography variant="body2" component="div">
           <strong>What happens when you update a license:</strong>
           <Box component="ul" sx={alertListSx}>
-            <li>Customer information (name, email) will be updated</li>
+            <li>Customer information (name, phone) will be updated</li>
             <li>Location information (name, address) will be updated</li>
             <li>Pricing information (initial price, annual price, price per user) will be updated</li>
             <li>

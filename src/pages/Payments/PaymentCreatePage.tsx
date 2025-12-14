@@ -486,13 +486,13 @@ export const PaymentCreatePage = () => {
                           </Typography>
                         </Grid>
                       )}
-                      {licenseData.customerEmail && (
+                      {licenseData.customerPhone && (
                         <Grid item xs={12} sm={6}>
                           <Typography variant="body2" color="text.secondary">
-                            Customer Email
+                            Customer Phone
                           </Typography>
                           <Typography variant="body1" sx={bodyTypographySx}>
-                            {licenseData.customerEmail}
+                            {licenseData.customerPhone}
                           </Typography>
                         </Grid>
                       )}

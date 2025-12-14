@@ -226,7 +226,7 @@ export const LicenseViewPage = () => {
             </Button>
           </span>
         </Tooltip>
-        <Tooltip title="Edit license information (customer name, email, location, prices). This does not affect existing subscriptions or payments.">
+        <Tooltip title="Edit license information (customer name, phone, location, prices). This does not affect existing subscriptions or payments.">
           <span>
             <Button variant="outlined" startIcon={<EditIcon />} onClick={handleEditLicense}>
               Edit
@@ -304,10 +304,10 @@ export const LicenseViewPage = () => {
           </Grid>
           <Grid item xs={12} md={6}>
             <Typography variant="subtitle2" color="text.secondary">
-              Customer Email
+              Customer Phone
             </Typography>
             <Typography variant="body1" sx={bodyTypographySx}>
-              {license.customerEmail || '-'}
+              {license.customerPhone || '-'}
             </Typography>
           </Grid>
           <Grid item xs={12} md={6}>

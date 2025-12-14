@@ -16,7 +16,7 @@ interface HeaderProps {
 const menuButtonSx = { mr: 2 };
 const titleSx = { flexGrow: 1 };
 const userBoxSx = { display: 'flex', alignItems: 'center', gap: 2 };
-const emailSx = { display: { xs: 'none', sm: 'block' } };
+const phoneSx = { display: { xs: 'none', sm: 'block' } };
 
 function HeaderComponent({ onMenuClick }: HeaderProps) {
   const dispatch = useDispatch<AppDispatch>();
@@ -62,8 +62,8 @@ function HeaderComponent({ onMenuClick }: HeaderProps) {
         </Typography>
         {user && (
           <Box sx={userBoxSx}>
-            <Typography variant="body2" sx={emailSx}>
-              {user.email}
+            <Typography variant="body2" sx={phoneSx}>
+              {user.phone}
             </Typography>
             <IconButton color="inherit" onClick={handleLogout} size="small">
               <LogoutIcon />
