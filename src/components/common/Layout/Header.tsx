@@ -62,9 +62,11 @@ function HeaderComponent({ onMenuClick }: HeaderProps) {
         </Typography>
         {user && (
           <Box sx={userBoxSx}>
-            <Typography variant="body2" sx={phoneSx}>
-              {user.phone}
-            </Typography>
+            {user.phone && (
+              <Typography variant="body2" sx={phoneSx}>
+                {user.phone}
+              </Typography>
+            )}
             <IconButton color="inherit" onClick={handleLogout} size="small">
               <LogoutIcon />
             </IconButton>

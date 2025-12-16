@@ -40,19 +40,36 @@ function AppLayoutComponent({ children }: AppLayoutProps) {
   const user = useSelector((state: RootState) => state.auth.user);
   
   // Fetch user info on mount if authenticated to ensure we have the latest data
-  const { data: userInfo } = useGetUserInfoQuery(undefined, {
+  const { data: userInfo, refetch: refetchUserInfo } = useGetUserInfoQuery(undefined, {
     skip: !isAuthenticated, // Only fetch if authenticated
+    refetchOnMountOrArgChange: true, // Always refetch on mount to get latest data
   });
 
   // Update Redux state when userInfo is fetched
   useEffect(() => {
     if (userInfo && isAuthenticated && user) {
-      // Update if phone number is different, missing, or empty
-      if (userInfo.phone && (userInfo.phone !== user.phone || !user.phone)) {
+      // Always update if we have phone from API and it's different or missing in state
+      const hasPhoneFromAPI = userInfo.phone && userInfo.phone.trim() !== '';
+      const phoneIsDifferent = userInfo.phone !== user.phone;
+      const phoneIsMissing = !user.phone || user.phone.trim() === '';
+      
+      if (hasPhoneFromAPI && (phoneIsDifferent || phoneIsMissing)) {
         dispatch(updateUser(userInfo));
       }
     }
   }, [userInfo, isAuthenticated, user, dispatch]);
+  
+  // Force refetch once if user exists but phone is missing (only on mount)
+  useEffect(() => {
+    if (isAuthenticated && user && (!user.phone || user.phone.trim() === '')) {
+      // Refetch user info to get phone number from server
+      // Use a small delay to avoid race conditions
+      const timer = setTimeout(() => {
+        refetchUserInfo();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, []); // Only run once on mount
 
   // Memoize the drawer toggle handler to prevent unnecessary re-renders of Header and Sidebar
   const handleDrawerToggle = useCallback(() => {

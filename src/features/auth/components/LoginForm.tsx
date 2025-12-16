@@ -72,9 +72,13 @@ function LoginFormComponent() {
         dispatch(setCredentials(result));
         
         // Refresh user info from server to ensure we have the latest data (especially phone number)
+        // This is important because the login response might not always include the phone number
         try {
           const userInfoResult = await refetchUserInfo().unwrap();
-          if (userInfoResult) {
+          if (userInfoResult && userInfoResult.phone) {
+            dispatch(updateUser(userInfoResult));
+          } else if (userInfoResult) {
+            // If we got userInfo but no phone, still update (phone might be null in DB)
             dispatch(updateUser(userInfoResult));
           }
         } catch (userInfoError) {
