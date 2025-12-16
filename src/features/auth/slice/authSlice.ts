@@ -70,7 +70,10 @@ const authSlice = createSlice({
     },
     updateUser: (state, action: PayloadAction<{ phone: string; name?: string }>) => {
       if (state.user) {
-        state.user.phone = action.payload.phone;
+        // Always update phone if provided (even if empty string, to clear old values)
+        if (action.payload.phone !== undefined) {
+          state.user.phone = action.payload.phone;
+        }
         if (action.payload.name !== undefined) {
           state.user.name = action.payload.name;
         }

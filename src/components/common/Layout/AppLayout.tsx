@@ -47,13 +47,20 @@ function AppLayoutComponent({ children }: AppLayoutProps) {
 
   // Update Redux state when userInfo is fetched
   useEffect(() => {
-    if (userInfo && isAuthenticated && user) {
-      // Always update if we have phone from API and it's different or missing in state
-      const hasPhoneFromAPI = userInfo.phone && userInfo.phone.trim() !== '';
-      const phoneIsDifferent = userInfo.phone !== user.phone;
-      const phoneIsMissing = !user.phone || user.phone.trim() === '';
-      
-      if (hasPhoneFromAPI && (phoneIsDifferent || phoneIsMissing)) {
+    if (userInfo && isAuthenticated) {
+      // Always update user data from API to ensure we have the latest phone number
+      // This is critical for production where phone might be missing from initial login response
+      if (user) {
+        const hasPhoneFromAPI = userInfo.phone && userInfo.phone.trim() !== '';
+        const phoneIsDifferent = userInfo.phone !== user.phone;
+        const phoneIsMissing = !user.phone || user.phone.trim() === '';
+        
+        if (hasPhoneFromAPI && (phoneIsDifferent || phoneIsMissing)) {
+          dispatch(updateUser(userInfo));
+        }
+      } else {
+        // If user doesn't exist in state but we have userInfo, update it
+        // This shouldn't happen normally, but handles edge cases
         dispatch(updateUser(userInfo));
       }
     }
