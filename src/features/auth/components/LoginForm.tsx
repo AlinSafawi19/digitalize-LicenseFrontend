@@ -16,8 +16,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../../../store';
-import { useLoginMutation } from '../slice/authApi';
-import { setCredentials } from '../slice/authSlice';
+import { useLoginMutation, useGetUserInfoQuery } from '../slice/authApi';
+import { setCredentials, updateUser } from '../slice/authSlice';
 import { useNavigate } from 'react-router-dom';
 import { routes } from '../../../config/routes';
 import { LoginCredentials } from '../../../types/auth.types';
@@ -52,6 +52,8 @@ function LoginFormComponent() {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const [login, { isLoading }] = useLoginMutation();
+  // Get the getUserInfo query hook - we'll trigger it manually after login
+  const { refetch: refetchUserInfo } = useGetUserInfoQuery(undefined, { skip: true });
 
   const {
     register,
@@ -68,13 +70,25 @@ function LoginFormComponent() {
         setError(null);
         const result = await login(data).unwrap();
         dispatch(setCredentials(result));
+        
+        // Refresh user info from server to ensure we have the latest data (especially phone number)
+        try {
+          const userInfoResult = await refetchUserInfo().unwrap();
+          if (userInfoResult) {
+            dispatch(updateUser(userInfoResult));
+          }
+        } catch (userInfoError) {
+          // If getUserInfo fails, continue anyway - we already have user data from login
+          console.warn('Failed to refresh user info after login:', userInfoError);
+        }
+        
         navigate(routes.dashboard);
       } catch (err: unknown) {
         const error = err as { data?: { message?: string } };
         setError(error?.data?.message || DEFAULT_ERROR_MESSAGE);
       }
     },
-    [login, dispatch, navigate]
+    [login, dispatch, navigate, refetchUserInfo]
   );
 
   // Memoize the toggle password handler to prevent recreation on every render

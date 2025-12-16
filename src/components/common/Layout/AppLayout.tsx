@@ -1,8 +1,12 @@
-import { ReactNode, useState, useCallback, memo } from 'react';
+import { ReactNode, useState, useCallback, memo, useEffect } from 'react';
 import { Box, Container } from '@mui/material';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 import { useSessionExpiry } from '../../../hooks/useSessionExpiry';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../../../store';
+import { useGetUserInfoQuery } from '../../../features/auth/slice/authApi';
+import { updateUser } from '../../../features/auth/slice/authSlice';
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -31,6 +35,24 @@ function AppLayoutComponent({ children }: AppLayoutProps) {
   // Monitor session expiry - shows warnings and handles logout
   useSessionExpiry();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const dispatch = useDispatch<AppDispatch>();
+  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+  const user = useSelector((state: RootState) => state.auth.user);
+  
+  // Fetch user info on mount if authenticated to ensure we have the latest data
+  const { data: userInfo } = useGetUserInfoQuery(undefined, {
+    skip: !isAuthenticated, // Only fetch if authenticated
+  });
+
+  // Update Redux state when userInfo is fetched
+  useEffect(() => {
+    if (userInfo && isAuthenticated && user) {
+      // Update if phone number is different, missing, or empty
+      if (userInfo.phone && (userInfo.phone !== user.phone || !user.phone)) {
+        dispatch(updateUser(userInfo));
+      }
+    }
+  }, [userInfo, isAuthenticated, user, dispatch]);
 
   // Memoize the drawer toggle handler to prevent unnecessary re-renders of Header and Sidebar
   const handleDrawerToggle = useCallback(() => {

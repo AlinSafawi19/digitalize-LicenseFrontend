@@ -68,8 +68,18 @@ const authSlice = createSlice({
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
     },
+    updateUser: (state, action: PayloadAction<{ phone: string; name?: string }>) => {
+      if (state.user) {
+        state.user.phone = action.payload.phone;
+        if (action.payload.name !== undefined) {
+          state.user.name = action.payload.name;
+        }
+        // Update localStorage to keep it in sync
+        localStorage.setItem('user', JSON.stringify(state.user));
+      }
+    },
   },
 });
 
-export const { setCredentials, logout, setLoading } = authSlice.actions;
+export const { setCredentials, logout, setLoading, updateUser } = authSlice.actions;
 export default authSlice.reducer;
