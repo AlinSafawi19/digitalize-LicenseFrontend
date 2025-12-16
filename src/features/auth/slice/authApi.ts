@@ -42,11 +42,15 @@ export const authApi = baseApi.injectEndpoints({
       transformResponse: (response: {
         success: boolean;
         message: string;
-        data: { id: number; username: string; phone: string };
-      }) => ({
-        phone: response.data.phone,
-        name: response.data.username,
-      }),
+        data: { id: number; username: string; phone: string | null };
+      }) => {
+        // Handle null phone from API - convert to empty string
+        const phone = response.data.phone || '';
+        return {
+          phone,
+          name: response.data.username,
+        };
+      },
       providesTags: ['Auth'],
       // Performance optimization: Cache user info for 10 minutes since it doesn't change frequently
       // This reduces unnecessary API calls when navigating between pages

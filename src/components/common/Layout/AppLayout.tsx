@@ -55,8 +55,15 @@ function AppLayoutComponent({ children }: AppLayoutProps) {
         const phoneIsDifferent = userInfo.phone !== user.phone;
         const phoneIsMissing = !user.phone || user.phone.trim() === '';
         
+        // Debug logging (remove in production if needed)
+          console.log('UserInfo from API:', { phone: userInfo.phone, name: userInfo.name });
+          console.log('Current user in state:', { phone: user?.phone, name: user?.name });
+        
         if (hasPhoneFromAPI && (phoneIsDifferent || phoneIsMissing)) {
           dispatch(updateUser(userInfo));
+        } else if (phoneIsMissing && !hasPhoneFromAPI) {
+          // If phone is missing in state and API also doesn't have it, log for debugging
+            console.warn('Phone number is missing in both state and API response');
         }
       } else {
         // If user doesn't exist in state but we have userInfo, update it

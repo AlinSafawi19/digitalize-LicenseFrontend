@@ -28,6 +28,11 @@ function HeaderComponent({ onMenuClick }: HeaderProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
+  // Debug: Log user data to help identify issues
+  if (user) {
+    console.log('Header - User data:', { phone: user.phone, name: user.name, id: user.id });
+  }
+
   // Memoize the logout handler to prevent unnecessary re-renders
   const handleLogout = useCallback(async () => {
     try {
