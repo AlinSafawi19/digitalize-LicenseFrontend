@@ -426,7 +426,36 @@ export const LicenseListPage = () => {
         label: 'Status',
         minWidth: 100,
         align: 'center',
-        format: (_value: unknown) => <LicenseStatusBadge status={_value as LicenseStatus} />,
+        format: (_value: unknown, row: License) => {
+          // Check if license has been activated
+          // Use activeActivationsCount if available (from backend when includeRelations is false)
+          // Otherwise check the activations array if available
+          let isNotActivated = false;
+          
+          if (row.activeActivationsCount !== undefined) {
+            // Use the count field from backend
+            isNotActivated = row.activeActivationsCount === 0;
+          } else if (row.activations !== undefined) {
+            // Fall back to checking activations array if available
+            isNotActivated = !row.activations || 
+              row.activations.length === 0 || 
+              !row.activations.some(activation => activation.isActive);
+          }
+          
+          return (
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
+              <LicenseStatusBadge status={_value as LicenseStatus} />
+              {isNotActivated && (
+                <Chip
+                  label="Not Activated"
+                  color="warning"
+                  size="small"
+                  sx={{ fontSize: '0.65rem', height: 18 }}
+                />
+              )}
+            </Box>
+          );
+        },
       },
       {
         id: 'isFreeTrial',

@@ -42,6 +42,8 @@ export interface License {
   activations?: Activation[];
   subscriptions?: Subscription[];
   payments?: Payment[];
+  // Count of active activations (available when includeRelations is false)
+  activeActivationsCount?: number;
 }
 
 /**
