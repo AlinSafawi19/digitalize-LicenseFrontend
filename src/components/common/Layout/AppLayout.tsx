@@ -1,4 +1,4 @@
-import { ReactNode, useState, useCallback, memo, useEffect } from 'react';
+import { ReactNode, useState, useCallback, memo, useEffect, useRef } from 'react';
 import { Box, Container } from '@mui/material';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
@@ -74,16 +74,18 @@ function AppLayoutComponent({ children }: AppLayoutProps) {
   }, [userInfo, isAuthenticated, user, dispatch]);
   
   // Force refetch once if user exists but phone is missing (only on mount)
+  const hasAttemptedRefetch = useRef(false);
   useEffect(() => {
-    if (isAuthenticated && user && (!user.phone || user.phone.trim() === '')) {
+    if (isAuthenticated && user && (!user.phone || user.phone.trim() === '') && !hasAttemptedRefetch.current) {
       // Refetch user info to get phone number from server
       // Use a small delay to avoid race conditions
+      hasAttemptedRefetch.current = true;
       const timer = setTimeout(() => {
         refetchUserInfo();
       }, 100);
       return () => clearTimeout(timer);
     }
-  }, []); // Only run once on mount
+  }, [isAuthenticated, user, refetchUserInfo]); // Include all dependencies
 
   // Memoize the drawer toggle handler to prevent unnecessary re-renders of Header and Sidebar
   const handleDrawerToggle = useCallback(() => {
