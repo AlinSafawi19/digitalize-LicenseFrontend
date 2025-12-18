@@ -61,7 +61,15 @@ export const useSessionExpiry = () => {
       dispatch(logout());
       showToast(EXPIRED_MESSAGE, 'warning');
       if (window.location.pathname !== LOGIN_PATH) {
-        window.location.href = LOGIN_PATH;
+        // Use pathname assignment to avoid file:// protocol issues
+        // For http/https, pathname assignment works correctly
+        // For file:// protocol, construct URL properly
+        if (window.location.protocol === 'file:') {
+          const basePath = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
+          window.location.href = basePath + 'login';
+        } else {
+          window.location.pathname = LOGIN_PATH;
+        }
       }
       return;
     }

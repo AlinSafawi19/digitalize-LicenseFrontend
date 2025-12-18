@@ -10,7 +10,15 @@ import { logout } from '../features/auth/slice/authSlice';
 const handleSessionExpiry = () => {
   store.dispatch(logout());
   if (window.location.pathname !== '/login') {
-    window.location.href = '/login';
+    // Use pathname assignment to avoid file:// protocol issues
+    // For http/https, pathname assignment works correctly
+    // For file:// protocol, construct URL properly
+    if (window.location.protocol === 'file:') {
+      const basePath = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
+      window.location.href = basePath + 'login';
+    } else {
+      window.location.pathname = '/login';
+    }
   }
 };
 
