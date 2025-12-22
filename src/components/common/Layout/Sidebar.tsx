@@ -7,6 +7,7 @@ import {
   CardMembership as SubscriptionIcon,
   Payment as PaymentIcon,
   Settings as SettingsIcon,
+  Tune as PreferencesIcon,
 } from '@mui/icons-material';
 import { routes } from '../../../config/routes';
 import { memo, useCallback, useMemo } from 'react';
@@ -27,6 +28,7 @@ const menuItems: MenuItem[] = [
   { text: 'Subscriptions', Icon: SubscriptionIcon, path: routes.subscriptions.list },
   { text: 'Payments', Icon: PaymentIcon, path: routes.payments.list },
   { text: 'Settings', Icon: SettingsIcon, path: routes.settings },
+  { text: 'Preferences', Icon: PreferencesIcon, path: routes.preferences },
 ];
 
 // Extract sx props to constants to prevent recreation on every render

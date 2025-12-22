@@ -4,6 +4,7 @@ import { ContentCopy as CopyIcon, Check as CheckIcon, Info as InfoIcon, ArrowBac
 import { useNavigate } from 'react-router-dom';
 import { LicenseForm } from '../../components/license/LicenseForm';
 import { useCreateLicenseMutation } from '../../api/licenseApi';
+import { useGetPreferencesQuery } from '../../api/preferencesApi';
 import { CreateLicenseInput, UpdateLicenseInput } from '../../types/license.types';
 import { routes } from '../../config/routes';
 
@@ -42,6 +43,8 @@ const formPaperSx = { p: 1.5 };
 export const LicenseCreatePage = () => {
   const navigate = useNavigate();
   const [createLicense, { isLoading }] = useCreateLicenseMutation();
+  const { data: preferences } = useGetPreferencesQuery();
+  const isPhoneVerificationEnabled = preferences?.general?.phoneNumberVerification ?? true;
   const [generatedLicenseKey, setGeneratedLicenseKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -144,7 +147,9 @@ export const LicenseCreatePage = () => {
               <Box component="ul" sx={alertListSx}>
                 <li>Generated automatically from the customer's phone number and name</li>
                 <li>Displayed on the license activation screen in the desktop app</li>
-                <li>Sent via WhatsApp to the customer's phone number</li>
+                {isPhoneVerificationEnabled && (
+                  <li>Sent via WhatsApp to the customer's phone number</li>
+                )}
                 <li>Shown only once during the first activation</li>
               </Box>
               <strong>Important:</strong> The customer must save these credentials when they activate the license, as they will need them to log in to the desktop application.

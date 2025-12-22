@@ -37,4 +37,5 @@ export const routes = {
     view: (id: number | string) => `/payments/${id}`,
   },
   settings: '/settings',
+  preferences: '/preferences',
 } as const;

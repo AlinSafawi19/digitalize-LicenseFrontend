@@ -83,7 +83,7 @@ const baseQueryWithReauth: typeof baseQueryWithAuth = async (args, api, extraOpt
 export const baseApi = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['License', 'Activation', 'Subscription', 'Payment', 'Stats', 'Auth'],
+  tagTypes: ['License', 'Activation', 'Subscription', 'Payment', 'Stats', 'Auth', 'Preferences'],
   endpoints: () => ({}),
   // Performance optimizations:
   // - Keep unused data cached for 5 minutes globally (can be overridden per endpoint)

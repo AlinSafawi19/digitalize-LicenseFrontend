@@ -97,6 +97,10 @@ const SettingsPage = createLazyComponent(
   () => import('./pages/Settings/SettingsPage'),
   'SettingsPage'
 );
+const PreferencesPage = createLazyComponent(
+  () => import('./pages/Preferences/PreferencesPage'),
+  'PreferencesPage'
+);
 
 /**
  * Helper component for protected routes with layout and suspense.
@@ -254,6 +258,14 @@ function App() {
                     element={
                       <ProtectedLayoutRoute>
                         <SettingsPage />
+                      </ProtectedLayoutRoute>
+                    }
+                  />
+                  <Route
+                    path={routes.preferences}
+                    element={
+                      <ProtectedLayoutRoute>
+                        <PreferencesPage />
                       </ProtectedLayoutRoute>
                     }
                   />

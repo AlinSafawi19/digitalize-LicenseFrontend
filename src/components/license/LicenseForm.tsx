@@ -9,6 +9,7 @@ import { dateToUTCISOString, utcDateStringToDate } from '../../utils/dateUtils';
 import PhoneInput from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 import { useSendOTPMutation, useVerifyOTPMutation } from '../../api/phoneVerificationApi';
+import { useGetPreferencesQuery } from '../../api/preferencesApi';
 import { CheckCircle } from '@mui/icons-material';
 
 interface LicenseFormProps {
@@ -28,6 +29,10 @@ function LicenseFormComponent({
   isLoading = false,
   submitLabel = 'Submit',
 }: LicenseFormProps) {
+  // Get preferences to check if phone verification is enabled
+  const { data: preferences } = useGetPreferencesQuery();
+  const isPhoneVerificationEnabled = preferences?.general?.phoneNumberVerification ?? true;
+
   // Phone verification state
   const [verificationToken, setVerificationToken] = useState<string | null>(null);
   const [otpCode, setOtpCode] = useState('');
@@ -80,7 +85,7 @@ function LicenseFormComponent({
 
   // Handle send OTP
   const handleSendOTP = useCallback(async () => {
-    if (!customerPhone) return;
+    if (!customerPhone || !isPhoneVerificationEnabled) return;
     
     try {
       await sendOTP({ phone: customerPhone }).unwrap();
@@ -88,7 +93,7 @@ function LicenseFormComponent({
     } catch (error: unknown) {
       console.error('Failed to send OTP:', error);
     }
-  }, [customerPhone, sendOTP]);
+  }, [customerPhone, sendOTP, isPhoneVerificationEnabled]);
 
   // Handle verify OTP
   const handleVerifyOTP = useCallback(async () => {
@@ -117,13 +122,14 @@ function LicenseFormComponent({
       // Convert dates to UTC ISO strings for API
       const submitData: CreateLicenseInput | UpdateLicenseInput = {
         ...data,
-        verificationToken: verificationToken || undefined, // Include verification token if available
+        // Only include verification token if phone verification is enabled and token exists
+        verificationToken: (isPhoneVerificationEnabled && verificationToken) || undefined,
         startDate: data.startDate ? dateToUTCISOString(data.startDate) : undefined,
         endDate: data.endDate ? dateToUTCISOString(data.endDate) : undefined,
       };
       await onSubmit(submitData);
     },
-    [onSubmit, verificationToken]
+    [onSubmit, verificationToken, isPhoneVerificationEnabled]
   );
 
   // Memoize the number field onChange handler to prevent recreation
@@ -189,8 +195,8 @@ function LicenseFormComponent({
                   </Typography>
                 )}
                 
-                {/* Phone Verification Section */}
-                {field.value && (
+                {/* Phone Verification Section - Only show if phone verification is enabled */}
+                {field.value && isPhoneVerificationEnabled && (
                   <Box sx={{ mt: 2, p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1, bgcolor: 'background.paper' }}>
                     {!phoneVerified ? (
                       <>
