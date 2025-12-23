@@ -168,7 +168,7 @@ export const PreferencesPage = () => {
                   label="Phone Number Verification"
                 />
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1, ml: 4 }}>
-                  When enabled, phone numbers must be verified before creating licenses. Verification codes are sent via WhatsApp. When disabled, phone verification UI will be hidden and WhatsApp messages will not be sent.
+                  When enabled, phone verification UI will be shown but verification is not required. Verification codes are sent via WhatsApp. When disabled, phone verification UI will be hidden and WhatsApp messages will not be sent.
                 </Typography>
               </Grid>
             </Grid>
