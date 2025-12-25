@@ -21,6 +21,8 @@ const COLOR_MAP: Record<'primary' | 'success' | 'warning' | 'error' | 'info', st
 // Extract sx props to constants to prevent recreation on every render
 const valueTypographySx = { fontWeight: 600 };
 const subtitleTypographySx = { mt: 1, display: 'block' };
+const cardSx = { height: '100%', display: 'flex', flexDirection: 'column' };
+const cardContentSx = { flexGrow: 1, display: 'flex', flexDirection: 'column' };
 
 function StatsCardComponent({ title, value, icon, color = 'primary', subtitle }: StatsCardProps) {
   // Memoize color value to prevent recalculation on every render
@@ -43,9 +45,9 @@ function StatsCardComponent({ title, value, icon, color = 'primary', subtitle }:
   const iconColorSx = useMemo(() => ({ color: colorValue }), [colorValue]);
 
   return (
-    <Card>
-      <CardContent>
-        <Box display="flex" justifyContent="space-between" alignItems="flex-start">
+    <Card sx={cardSx}>
+      <CardContent sx={cardContentSx}>
+        <Box display="flex" justifyContent="space-between" alignItems="flex-start" sx={{ flexGrow: 1 }}>
           <Box>
             <Typography color="text.secondary" gutterBottom variant="body2">
               {title}
@@ -58,6 +60,7 @@ function StatsCardComponent({ title, value, icon, color = 'primary', subtitle }:
                 {subtitle}
               </Typography>
             )}
+            {!subtitle && <Box sx={{ mt: 1, height: '1.5rem' }} />}
           </Box>
           {icon && (
             <Box sx={iconBoxSx}>

@@ -1,5 +1,5 @@
 import { Paper, Typography, Box } from '@mui/material';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { memo, useMemo, useCallback } from 'react';
 
 interface SubscriptionsChartProps {
@@ -43,15 +43,15 @@ function SubscriptionsChartComponent({ total, active, expired }: SubscriptionsCh
       </Box>
       <Box sx={chartBoxSx}>
         <ResponsiveContainer>
-          <BarChart data={data}>
+          <LineChart data={data}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" />
             <YAxis />
             <Tooltip formatter={formatTooltipValue} />
             <Legend />
-            <Bar dataKey="Active" fill="#1b5e20" />
-            <Bar dataKey="Expired" fill="#e65100" />
-          </BarChart>
+            <Line type="monotone" dataKey="Active" stroke="#1b5e20" strokeWidth={2} dot={{ r: 6 }} />
+            <Line type="monotone" dataKey="Expired" stroke="#e65100" strokeWidth={2} dot={{ r: 6 }} />
+          </LineChart>
         </ResponsiveContainer>
       </Box>
     </Paper>

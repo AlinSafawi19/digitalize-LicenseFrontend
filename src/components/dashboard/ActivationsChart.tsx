@@ -1,5 +1,5 @@
 import { Paper, Typography, Box } from '@mui/material';
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { memo, useMemo, useCallback } from 'react';
 
 interface ActivationsChartProps {
@@ -7,8 +7,6 @@ interface ActivationsChartProps {
   active: number;
   inactive: number;
 }
-
-const COLORS = ['#1b5e20', '#e65100'];
 
 // Extract sx props to constants to prevent recreation on every render
 const paperSx = { p: 3, height: '100%' };
@@ -18,18 +16,17 @@ function ActivationsChartComponent({ total, active, inactive }: ActivationsChart
   // Memoize chart data to prevent recreation on every render
   const chartData = useMemo(
     () => [
-      { name: 'Active', value: active },
-      { name: 'Inactive', value: inactive },
-    ].filter((item) => item.value > 0),
+      {
+        name: 'Activations',
+        Active: active,
+        Inactive: inactive,
+      },
+    ],
     [active, inactive]
   );
 
-  // Memoize the label function to prevent recreation on every render
-  const renderLabel = useCallback(
-    ({ name, percent }: { name: string; percent: number }) =>
-      `${name}: ${(percent * 100).toFixed(0)}%`,
-    []
-  );
+  // Memoize the tooltip formatter function to prevent recreation on every render
+  const formatTooltipValue = useCallback((value: number) => value.toString(), []);
 
   return (
     <Paper sx={paperSx}>
@@ -46,24 +43,15 @@ function ActivationsChartComponent({ total, active, inactive }: ActivationsChart
       </Box>
       <Box sx={chartBoxSx}>
         <ResponsiveContainer>
-          <PieChart>
-            <Pie
-              data={chartData}
-              cx="50%"
-              cy="50%"
-              labelLine={false}
-              label={renderLabel}
-              outerRadius={80}
-              fill="#534bae"
-              dataKey="value"
-            >
-              {chartData.map((_entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-              ))}
-            </Pie>
-            <Tooltip />
+          <AreaChart data={chartData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="name" />
+            <YAxis />
+            <Tooltip formatter={formatTooltipValue} />
             <Legend />
-          </PieChart>
+            <Area type="monotone" dataKey="Active" stackId="1" stroke="#1b5e20" fill="#1b5e20" fillOpacity={0.6} />
+            <Area type="monotone" dataKey="Inactive" stackId="1" stroke="#e65100" fill="#e65100" fillOpacity={0.6} />
+          </AreaChart>
         </ResponsiveContainer>
       </Box>
     </Paper>

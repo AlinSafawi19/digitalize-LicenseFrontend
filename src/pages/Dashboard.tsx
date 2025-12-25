@@ -262,7 +262,7 @@ export const DashboardPage = () => {
         )}
 
         {/* Quick Actions */}
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12}>
           <Paper sx={sectionPaperSx}>
             <Typography variant="h6" sx={sectionTitleSx}>
               Quick Actions
@@ -344,7 +344,7 @@ export const DashboardPage = () => {
         </Grid>
 
         {/* Recent Payments */}
-        <Grid item xs={12} md={8}>
+        <Grid item xs={12}>
           <Paper sx={sectionPaperSx}>
             <Typography variant="h6" sx={sectionTitleSx}>
               Recent Payments
