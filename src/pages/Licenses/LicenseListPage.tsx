@@ -9,6 +9,7 @@ import {
   IconButton,
   Tooltip,
   Chip,
+  Menu,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -22,6 +23,7 @@ import {
   ContentCopy as CopyIcon,
   Check as CheckIcon,
   Block as BlockIcon,
+  MoreVert as MoreVertIcon,
 } from '@mui/icons-material';
 import { useGetLicensesQuery, useRevokeLicenseMutation, useDeleteLicenseMutation, useLazyExportLicensesCSVQuery } from '../../api/licenseApi';
 import { DataTable, Column } from '../../components/common/DataTable/DataTable';
@@ -97,6 +99,7 @@ export const LicenseListPage = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [licenseToDelete, setLicenseToDelete] = useState<number | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [actionMenuAnchor, setActionMenuAnchor] = useState<{ el: HTMLElement; license: License } | null>(null);
 
   const [sortBy] = useState('createdAt');
   const [sortOrder] = useState<'asc' | 'desc'>('desc');
@@ -364,73 +367,82 @@ export const LicenseListPage = () => {
     [copiedKey, handleCopyLicenseKey]
   );
 
+  // Memoize handleActionMenuOpen to prevent recreation on every render
+  const handleActionMenuOpen = useCallback((event: React.MouseEvent<HTMLElement>, license: License) => {
+    event.stopPropagation();
+    setActionMenuAnchor({ el: event.currentTarget, license });
+  }, []);
+
+  // Memoize handleActionMenuClose to prevent recreation on every render
+  const handleActionMenuClose = useCallback(() => {
+    setActionMenuAnchor(null);
+  }, []);
+
+  // Memoize menu action handlers
+  const handleMenuView = useCallback(() => {
+    if (actionMenuAnchor) {
+      handleViewLicense(actionMenuAnchor.license.id);
+      handleActionMenuClose();
+    }
+  }, [actionMenuAnchor, handleViewLicense, handleActionMenuClose]);
+
+  const handleMenuEdit = useCallback(() => {
+    if (actionMenuAnchor) {
+      handleEditLicense(actionMenuAnchor.license.id);
+      handleActionMenuClose();
+    }
+  }, [actionMenuAnchor, handleEditLicense, handleActionMenuClose]);
+
+  const handleMenuIncreaseUserLimit = useCallback(() => {
+    if (actionMenuAnchor) {
+      handleIncreaseUserLimitClick(actionMenuAnchor.license);
+      handleActionMenuClose();
+    }
+  }, [actionMenuAnchor, handleIncreaseUserLimitClick, handleActionMenuClose]);
+
+  const handleMenuAddPayment = useCallback(() => {
+    if (actionMenuAnchor) {
+      handleAddPayment(actionMenuAnchor.license.licenseKey);
+      handleActionMenuClose();
+    }
+  }, [actionMenuAnchor, handleAddPayment, handleActionMenuClose]);
+
+  const handleMenuReactivate = useCallback(() => {
+    if (actionMenuAnchor) {
+      handleReactivateClick(actionMenuAnchor.license);
+      handleActionMenuClose();
+    }
+  }, [actionMenuAnchor, handleReactivateClick, handleActionMenuClose]);
+
+  const handleMenuRevoke = useCallback(() => {
+    if (actionMenuAnchor) {
+      handleRevokeClick(actionMenuAnchor.license.id);
+      handleActionMenuClose();
+    }
+  }, [actionMenuAnchor, handleRevokeClick, handleActionMenuClose]);
+
+  const handleMenuDelete = useCallback(() => {
+    if (actionMenuAnchor) {
+      handleDeleteClick(actionMenuAnchor.license.id);
+      handleActionMenuClose();
+    }
+  }, [actionMenuAnchor, handleDeleteClick, handleActionMenuClose]);
+
   // Create actions formatter with current handlers
   const actionsFormatter = useMemo(
     () => (_value: unknown, row: License) => (
       <Box sx={actionsBoxSx}>
-        <Tooltip title="View license details including activations, subscriptions, and payment history">
-          <IconButton size="small" onClick={() => handleViewLicense(row.id)}>
-            <ViewIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Edit license information (customer name, phone, location, prices). This does not affect existing subscriptions or payments.">
-          <IconButton size="small" onClick={() => handleEditLicense(row.id)}>
-            <EditIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Increase the user limit for this license. This allows more users to be added to the license. The change takes effect immediately.">
+        <Tooltip title="License actions">
           <IconButton
             size="small"
-            color="primary"
-            onClick={() => handleIncreaseUserLimitClick(row)}
+            onClick={(e) => handleActionMenuOpen(e, row)}
           >
-            <PersonAddIcon fontSize="small" />
+            <MoreVertIcon fontSize="small" />
           </IconButton>
-        </Tooltip>
-        <Tooltip title="Add a payment record for this license. This can be an initial payment, annual subscription payment, or user limit increase payment. Payments extend subscriptions and update license status.">
-          <IconButton size="small" color="success" onClick={() => handleAddPayment(row.licenseKey)}>
-            <PaymentIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Reactivate this license by deactivating all existing activations. This allows the customer to re-enter their license key. All license data (subscriptions, payments, deadlines) will be preserved.">
-          <IconButton size="small" color="primary" onClick={() => handleReactivateClick(row)}>
-            <RefreshIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Revoke this license. The license will be marked as revoked and all activations will be deactivated. This is a soft delete and can be reactivated.">
-          <span>
-            <IconButton
-              size="small"
-              color="warning"
-              onClick={() => handleRevokeClick(row.id)}
-              disabled={row.status === 'revoked'}
-            >
-              <BlockIcon fontSize="small" />
-            </IconButton>
-          </span>
-        </Tooltip>
-        <Tooltip title="Delete this license permanently. This action cannot be undone. All license data will be permanently removed from the database.">
-          <span>
-            <IconButton
-              size="small"
-              color="error"
-              onClick={() => handleDeleteClick(row.id)}
-            >
-              <DeleteIcon fontSize="small" />
-            </IconButton>
-          </span>
         </Tooltip>
       </Box>
     ),
-    [
-      handleViewLicense,
-      handleEditLicense,
-      handleIncreaseUserLimitClick,
-      handleAddPayment,
-      handleReactivateClick,
-      handleRevokeClick,
-      handleDeleteClick,
-    ]
+    [handleActionMenuOpen]
   );
 
   // Memoize columns array to prevent recreation on every render
@@ -691,6 +703,52 @@ export const LicenseListPage = () => {
         onConfirm={handleDeleteConfirm}
         onCancel={handleDeleteCancel}
       />
+
+      <Menu
+        anchorEl={actionMenuAnchor?.el}
+        open={Boolean(actionMenuAnchor)}
+        onClose={handleActionMenuClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+      >
+        <MenuItem onClick={handleMenuView}>
+          <ViewIcon fontSize="small" sx={{ mr: 1 }} />
+          View Details
+        </MenuItem>
+        <MenuItem onClick={handleMenuEdit}>
+          <EditIcon fontSize="small" sx={{ mr: 1 }} />
+          Edit License
+        </MenuItem>
+        <MenuItem onClick={handleMenuIncreaseUserLimit}>
+          <PersonAddIcon fontSize="small" sx={{ mr: 1 }} />
+          Increase User Limit
+        </MenuItem>
+        <MenuItem onClick={handleMenuAddPayment}>
+          <PaymentIcon fontSize="small" sx={{ mr: 1 }} />
+          Add Payment
+        </MenuItem>
+        <MenuItem onClick={handleMenuReactivate}>
+          <RefreshIcon fontSize="small" sx={{ mr: 1 }} />
+          Reactivate License
+        </MenuItem>
+        <MenuItem
+          onClick={handleMenuRevoke}
+          disabled={actionMenuAnchor?.license.status === 'revoked'}
+        >
+          <BlockIcon fontSize="small" sx={{ mr: 1 }} />
+          Revoke License
+        </MenuItem>
+        <MenuItem onClick={handleMenuDelete} sx={{ color: 'error.main' }}>
+          <DeleteIcon fontSize="small" sx={{ mr: 1 }} />
+          Delete Permanently
+        </MenuItem>
+      </Menu>
 
     </Box>
   );
