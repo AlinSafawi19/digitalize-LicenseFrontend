@@ -52,7 +52,7 @@ const ERROR_LOADING_DASHBOARD_TITLE = 'Error Loading Dashboard';
 
 // Extract sx props to constants to prevent recreation on every render
 const titleTypographySx = { mb: 2.5 };
-const recentActivityPaperSx = { p: 2.5 };
+const recentActivityPaperSx = { p: 2.5, height: '100%' };
 const recentActivityGridSx = { mt: 1.5 };
 const sectionPaperSx = { p: 2.5, height: '100%' };
 const sectionTitleSx = { mb: 2, display: 'flex', alignItems: 'center', gap: 1 };
