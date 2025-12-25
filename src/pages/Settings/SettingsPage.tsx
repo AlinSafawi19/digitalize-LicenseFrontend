@@ -15,20 +15,29 @@ import { config } from '../../config/env';
 const SUCCESS_TIMEOUT = 3000; // 3 seconds
 const MIN_PASSWORD_LENGTH = 6;
 const MIN_USERNAME_LENGTH = 3;
-const SUCCESS_UPDATED = 'Successfully updated';
 const ERROR_PROFILE_UPDATE = 'Failed to update profile. Please try again.';
 const ERROR_PASSWORD_CHANGE = 'Failed to change password. Please try again.';
 const ERROR_NO_CHANGES = 'No changes detected';
 const ERROR_INVALID_PHONE = 'Please enter a valid phone number';
-const ERROR_ALL_FIELDS_REQUIRED = 'All password fields are required';
+const ERROR_USERNAME_REQUIRED = 'Username is required';
+const ERROR_PHONE_REQUIRED = 'Phone number is required';
+const ERROR_USERNAME_TOO_SHORT = `Username must be at least ${MIN_USERNAME_LENGTH} characters`;
+const ERROR_USERNAME_INVALID = 'Username can only contain letters, numbers, and underscores';
+const ERROR_AT_LEAST_ONE_FIELD_REQUIRED = 'At least one field (username or phone) is required';
+const ERROR_CURRENT_PASSWORD_REQUIRED = 'Current password is required';
+const ERROR_NEW_PASSWORD_REQUIRED = 'New password is required';
+const ERROR_CONFIRM_PASSWORD_REQUIRED = 'Confirm password is required';
 const ERROR_PASSWORD_TOO_SHORT = 'New password must be at least 6 characters long';
 const ERROR_PASSWORDS_DONT_MATCH = 'New passwords do not match';
 const ERROR_SAME_PASSWORD = 'New password must be different from current password';
 const SUCCESS_PROFILE_UPDATED = 'Profile updated successfully!';
 const SUCCESS_PASSWORD_CHANGED = 'Password changed successfully!';
 
-// Phone validation regex - extract to constant to avoid recreation
+// Phone validation regex - extract to constant to avoid recreation (matches server validation)
 const PHONE_REGEX = /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,9}$/;
+
+// Username validation regex - matches server validation (letters, numbers, and underscores only)
+const USERNAME_REGEX = /^[a-zA-Z0-9_]+$/;
 
 // Extract sx props to constants to prevent recreation on every render
 const titleTypographySx = { mb: 2.5 };
@@ -52,6 +61,8 @@ export const SettingsPage = () => {
   const [name, setName] = useState('');
   const [profileSaved, setProfileSaved] = useState(false);
   const [profileErrorMsg, setProfileErrorMsg] = useState('');
+  const [nameError, setNameError] = useState('');
+  const [phoneError, setPhoneError] = useState('');
 
   // Password state
   const [currentPassword, setCurrentPassword] = useState('');
@@ -59,6 +70,9 @@ export const SettingsPage = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordSaved, setPasswordSaved] = useState(false);
   const [passwordErrorMsg, setPasswordErrorMsg] = useState('');
+  const [currentPasswordError, setCurrentPasswordError] = useState('');
+  const [newPasswordError, setNewPasswordError] = useState('');
+  const [confirmPasswordError, setConfirmPasswordError] = useState('');
 
   // Timeout refs for cleanup
   const profileTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -105,31 +119,57 @@ export const SettingsPage = () => {
   const handleProfileSave = useCallback(async () => {
     setProfileErrorMsg('');
     setProfileSaved(false);
+    setNameError('');
+    setPhoneError('');
 
-    // Validate that at least one field has changed
-    if (name === userInfo?.name && phone === userInfo?.phone) {
-      setProfileErrorMsg(ERROR_NO_CHANGES);
+    const trimmedName = name.trim();
+    const trimmedPhone = phone.trim();
+
+    // Validate that at least one field is provided
+    if (!trimmedName && !trimmedPhone) {
+      setProfileErrorMsg(ERROR_AT_LEAST_ONE_FIELD_REQUIRED);
+      setNameError(ERROR_USERNAME_REQUIRED);
+      setPhoneError(ERROR_PHONE_REQUIRED);
       return;
     }
 
-    // Validate phone format
-    if (phone && !PHONE_REGEX.test(phone)) {
-      setProfileErrorMsg(ERROR_INVALID_PHONE);
+    // Validate username if provided
+    if (trimmedName) {
+      if (trimmedName.length < MIN_USERNAME_LENGTH) {
+        setNameError(ERROR_USERNAME_TOO_SHORT);
+        return;
+      }
+      if (!USERNAME_REGEX.test(trimmedName)) {
+        setNameError(ERROR_USERNAME_INVALID);
+        return;
+      }
+    }
+
+    // Validate phone format if provided
+    if (trimmedPhone) {
+      if (!PHONE_REGEX.test(trimmedPhone)) {
+        setPhoneError(ERROR_INVALID_PHONE);
+        return;
+      }
+    }
+
+    // Validate that at least one field has changed
+    if (trimmedName === userInfo?.name && trimmedPhone === userInfo?.phone) {
+      setProfileErrorMsg(ERROR_NO_CHANGES);
       return;
     }
 
     try {
       const updates: { username?: string; phone?: string } = {};
-      if (name && name !== userInfo?.name) {
-        updates.username = name;
+      if (trimmedName && trimmedName !== userInfo?.name) {
+        updates.username = trimmedName;
       }
-      if (phone && phone !== userInfo?.phone) {
-        updates.phone = phone;
+      if (trimmedPhone && trimmedPhone !== userInfo?.phone) {
+        updates.phone = trimmedPhone;
       }
 
       await updateProfile(updates).unwrap();
       setProfileSaved(true);
-      window.alert(SUCCESS_UPDATED);
 
       // Clear any existing timeout
       if (profileTimeoutRef.current) {
@@ -153,25 +193,47 @@ export const SettingsPage = () => {
   const handlePasswordChange = useCallback(async () => {
     setPasswordErrorMsg('');
     setPasswordSaved(false);
+    setCurrentPasswordError('');
+    setNewPasswordError('');
+    setConfirmPasswordError('');
 
-    // Validate inputs
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      setPasswordErrorMsg(ERROR_ALL_FIELDS_REQUIRED);
+    // Validate required fields (matching server validation)
+    let hasError = false;
+
+    if (!currentPassword.trim()) {
+      setCurrentPasswordError(ERROR_CURRENT_PASSWORD_REQUIRED);
+      hasError = true;
+    }
+
+    if (!newPassword.trim()) {
+      setNewPasswordError(ERROR_NEW_PASSWORD_REQUIRED);
+      hasError = true;
+    }
+
+    if (!confirmPassword.trim()) {
+      setConfirmPasswordError(ERROR_CONFIRM_PASSWORD_REQUIRED);
+      hasError = true;
+    }
+
+    if (hasError) {
       return;
     }
 
+    // Validate new password length (matching server validation - min 6 characters)
     if (newPassword.length < MIN_PASSWORD_LENGTH) {
-      setPasswordErrorMsg(ERROR_PASSWORD_TOO_SHORT);
+      setNewPasswordError(ERROR_PASSWORD_TOO_SHORT);
       return;
     }
 
+    // Validate passwords match
     if (newPassword !== confirmPassword) {
-      setPasswordErrorMsg(ERROR_PASSWORDS_DONT_MATCH);
+      setConfirmPasswordError(ERROR_PASSWORDS_DONT_MATCH);
       return;
     }
 
+    // Validate new password is different from current password
     if (currentPassword === newPassword) {
-      setPasswordErrorMsg(ERROR_SAME_PASSWORD);
+      setNewPasswordError(ERROR_SAME_PASSWORD);
       return;
     }
 
@@ -181,7 +243,6 @@ export const SettingsPage = () => {
         newPassword,
       }).unwrap();
       setPasswordSaved(true);
-      window.alert(SUCCESS_UPDATED);
 
       // Clear any existing timeout
       if (passwordTimeoutRef.current) {
@@ -205,35 +266,141 @@ export const SettingsPage = () => {
 
   // Memoize onChange handlers to prevent recreation on every render
   const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setName(e.target.value);
-  }, []);
+    const value = e.target.value;
+    setName(value);
+    // Clear required error when user starts typing
+    if (nameError === ERROR_USERNAME_REQUIRED) {
+      setNameError('');
+    }
+    // Clear phone required error if name is being filled
+    if (value.trim() && phoneError === ERROR_PHONE_REQUIRED) {
+      setPhoneError('');
+    }
+    // Real-time validation
+    if (value.trim()) {
+      if (value.trim().length < MIN_USERNAME_LENGTH) {
+        setNameError(ERROR_USERNAME_TOO_SHORT);
+      } else if (!USERNAME_REGEX.test(value.trim())) {
+        setNameError(ERROR_USERNAME_INVALID);
+      } else {
+        setNameError('');
+      }
+    } else {
+      // Only clear error if it's not a required error (required errors are set on submit)
+      if (nameError && nameError !== ERROR_USERNAME_REQUIRED) {
+        setNameError('');
+      }
+    }
+  }, [nameError, phoneError]);
 
   const handlePhoneChange = useCallback((value: string | undefined) => {
-    setPhone(value || '');
-  }, []);
+    const phoneValue = value || '';
+    setPhone(phoneValue);
+    // Clear required error when user starts typing
+    if (phoneError === ERROR_PHONE_REQUIRED) {
+      setPhoneError('');
+    }
+    // Clear name required error if phone is being filled
+    if (phoneValue.trim() && nameError === ERROR_USERNAME_REQUIRED) {
+      setNameError('');
+    }
+    // Real-time validation
+    if (phoneValue.trim()) {
+      if (!PHONE_REGEX.test(phoneValue.trim())) {
+        setPhoneError(ERROR_INVALID_PHONE);
+      } else {
+        setPhoneError('');
+      }
+    } else {
+      // Only clear error if it's not a required error (required errors are set on submit)
+      if (phoneError && phoneError !== ERROR_PHONE_REQUIRED) {
+        setPhoneError('');
+      }
+    }
+  }, [phoneError, nameError]);
 
   const handleCurrentPasswordChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setCurrentPassword(e.target.value);
-  }, []);
+    const value = e.target.value;
+    setCurrentPassword(value);
+    // Clear required error when user starts typing
+    if (currentPasswordError === ERROR_CURRENT_PASSWORD_REQUIRED) {
+      setCurrentPasswordError('');
+    }
+  }, [currentPasswordError]);
 
   const handleNewPasswordChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setNewPassword(e.target.value);
-  }, []);
+    const value = e.target.value;
+    setNewPassword(value);
+    // Clear required error when user starts typing
+    if (newPasswordError === ERROR_NEW_PASSWORD_REQUIRED) {
+      setNewPasswordError('');
+    }
+    // Real-time validation
+    if (value) {
+      if (value.length < MIN_PASSWORD_LENGTH) {
+        setNewPasswordError(ERROR_PASSWORD_TOO_SHORT);
+      } else {
+        // Clear length error if valid
+        if (newPasswordError === ERROR_PASSWORD_TOO_SHORT) {
+          setNewPasswordError('');
+        }
+        // Check if matches current password
+        if (value === currentPassword) {
+          setNewPasswordError(ERROR_SAME_PASSWORD);
+        } else if (newPasswordError === ERROR_SAME_PASSWORD) {
+          setNewPasswordError('');
+        }
+      }
+    } else {
+      // Only clear error if it's not a required error (required errors are set on submit)
+      if (newPasswordError && newPasswordError !== ERROR_NEW_PASSWORD_REQUIRED) {
+        setNewPasswordError('');
+      }
+    }
+    // Update confirm password error if confirm password field has a value
+    if (confirmPassword) {
+      if (value === confirmPassword) {
+        if (confirmPasswordError === ERROR_PASSWORDS_DONT_MATCH) {
+          setConfirmPasswordError('');
+        }
+      } else {
+        setConfirmPasswordError(ERROR_PASSWORDS_DONT_MATCH);
+      }
+    }
+  }, [newPasswordError, currentPassword, confirmPassword, confirmPasswordError]);
 
   const handleConfirmPasswordChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setConfirmPassword(e.target.value);
-  }, []);
+    const value = e.target.value;
+    setConfirmPassword(value);
+    // Clear required error when user starts typing
+    if (confirmPasswordError === ERROR_CONFIRM_PASSWORD_REQUIRED) {
+      setConfirmPasswordError('');
+    }
+    // Real-time validation - check if matches new password
+    if (value) {
+      if (value !== newPassword) {
+        setConfirmPasswordError(ERROR_PASSWORDS_DONT_MATCH);
+      } else {
+        setConfirmPasswordError('');
+      }
+    } else {
+      // Only clear error if it's not a required error (required errors are set on submit)
+      if (confirmPasswordError && confirmPasswordError !== ERROR_CONFIRM_PASSWORD_REQUIRED) {
+        setConfirmPasswordError('');
+      }
+    }
+  }, [confirmPasswordError, newPassword]);
 
-  // Memoize disabled condition for profile save button
+  // Memoize disabled condition for profile save button - only disable when loading
   const isProfileSaveDisabled = useMemo(
-    () => isUpdatingProfile || (name === userInfo?.name && phone === userInfo?.phone),
-    [isUpdatingProfile, name, phone, userInfo?.name, userInfo?.phone]
+    () => isUpdatingProfile,
+    [isUpdatingProfile]
   );
 
-  // Memoize disabled condition for password change button
+  // Memoize disabled condition for password change button - only disable when loading
   const isPasswordChangeDisabled = useMemo(
-    () => isChangingPassword || !currentPassword || !newPassword || !confirmPassword,
-    [isChangingPassword, currentPassword, newPassword, confirmPassword]
+    () => isChangingPassword,
+    [isChangingPassword]
   );
 
   if (isLoading) {
@@ -264,12 +431,13 @@ export const SettingsPage = () => {
                   value={name}
                   onChange={handleNameChange}
                   variant="outlined"
-                  helperText={`Username (minimum ${MIN_USERNAME_LENGTH} characters)`}
+                  error={!!nameError}
+                  helperText={nameError || `Username (minimum ${MIN_USERNAME_LENGTH} characters, letters, numbers, and underscores only)`}
                 />
               </Grid>
               <Grid item xs={12}>
                 <Box>
-                  <Typography variant="body2" sx={{ mb: 1, fontSize: '14px', color: 'text.secondary' }}>
+                  <Typography variant="body2" sx={{ mb: 1, fontSize: '14px', color: phoneError ? 'error.main' : 'text.secondary' }}>
                     Phone Number
                   </Typography>
                   <PhoneInput
@@ -277,15 +445,21 @@ export const SettingsPage = () => {
                     defaultCountry="LB"
                     value={phone}
                     onChange={handlePhoneChange}
-                    className="mui-phone-input"
+                    className={`mui-phone-input ${phoneError ? 'mui-phone-input-error' : ''}`}
                     style={{
                       '--PhoneInputInput-height': '56px',
                       '--PhoneInputInput-fontSize': '16px',
                     } as React.CSSProperties}
                   />
-                  <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '12px', mt: 0.5, display: 'block' }}>
-                    Your phone number
-                  </Typography>
+                  {phoneError ? (
+                    <Typography variant="caption" sx={{ color: 'error.main', fontSize: '12px', mt: 0.5, display: 'block' }}>
+                      {phoneError}
+                    </Typography>
+                  ) : (
+                    <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '12px', mt: 0.5, display: 'block' }}>
+                      Your phone number
+                    </Typography>
+                  )}
                   <style>{`
                     .mui-phone-input {
                       width: 100%;
@@ -303,6 +477,13 @@ export const SettingsPage = () => {
                       border-color: #1976d2;
                       border-width: 2px;
                       outline: none;
+                    }
+                    .mui-phone-input-error .PhoneInputInput {
+                      border-color: #d32f2f;
+                    }
+                    .mui-phone-input-error .PhoneInputInput:focus {
+                      border-color: #d32f2f;
+                      border-width: 2px;
                     }
                     .mui-phone-input .PhoneInputCountry {
                       margin-right: 8px;
@@ -354,7 +535,9 @@ export const SettingsPage = () => {
                   variant="outlined"
                   value={currentPassword}
                   onChange={handleCurrentPasswordChange}
-                  helperText="Enter your current password"
+                  error={!!currentPasswordError}
+                  helperText={currentPasswordError || 'Enter your current password'}
+                  required
                 />
               </Grid>
               <Grid item xs={12}>
@@ -365,7 +548,9 @@ export const SettingsPage = () => {
                   variant="outlined"
                   value={newPassword}
                   onChange={handleNewPasswordChange}
-                  helperText={`Minimum ${MIN_PASSWORD_LENGTH} characters`}
+                  error={!!newPasswordError}
+                  helperText={newPasswordError || `Minimum ${MIN_PASSWORD_LENGTH} characters`}
+                  required
                 />
               </Grid>
               <Grid item xs={12}>
@@ -376,7 +561,9 @@ export const SettingsPage = () => {
                   variant="outlined"
                   value={confirmPassword}
                   onChange={handleConfirmPasswordChange}
-                  helperText="Re-enter your new password"
+                  error={!!confirmPasswordError}
+                  helperText={confirmPasswordError || 'Re-enter your new password'}
+                  required
                 />
               </Grid>
               <Grid item xs={12}>
