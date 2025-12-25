@@ -262,7 +262,7 @@ export const DashboardPage = () => {
         )}
 
         {/* Quick Actions */}
-        <Grid item xs={12}>
+        <Grid item xs={12} md={6}>
           <Paper sx={sectionPaperSx}>
             <Typography variant="h6" sx={sectionTitleSx}>
               Quick Actions
