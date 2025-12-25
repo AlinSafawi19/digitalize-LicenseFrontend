@@ -2,15 +2,7 @@ import { Box, Grid, Typography, Paper, Button, Alert, Link, Chip, Divider } from
 import {
   VpnKey as LicenseIcon,
   CheckCircle as ActiveIcon,
-  Cancel as ExpiredIcon,
-  Devices as ActivationIcon,
-  CardMembership as SubscriptionIcon,
   AttachMoney as RevenueIcon,
-  Warning as ExpiringIcon,
-  FreeBreakfast as FreeTrialIcon,
-  Block as RevokedIcon,
-  Pause as SuspendedIcon,
-  PowerOff as InactiveIcon,
   Add as AddIcon,
   Payment as PaymentIcon,
   Refresh as RefreshIcon,
@@ -36,13 +28,27 @@ const RevenueChart = lazy(() =>
     default: module.RevenueChart
   }))
 );
+const ActivationsChart = lazy(() => 
+  import('../components/dashboard/ActivationsChart').then(module => ({
+    default: module.ActivationsChart
+  }))
+);
+const SubscriptionsChart = lazy(() => 
+  import('../components/dashboard/SubscriptionsChart').then(module => ({
+    default: module.SubscriptionsChart
+  }))
+);
+const SummaryStatsGrid = lazy(() => 
+  import('../components/dashboard/SummaryStatsGrid').then(module => ({
+    default: module.SummaryStatsGrid
+  }))
+);
 import { LoadingSpinner } from '../components/common/Loading/LoadingSpinner';
 import { ErrorMessage } from '../components/common/Error/ErrorMessage';
 
 // Constants
 const ERROR_LOADING_DASHBOARD_MESSAGE = 'Failed to load dashboard statistics. Please try again later.';
 const ERROR_LOADING_DASHBOARD_TITLE = 'Error Loading Dashboard';
-const EXPIRING_SOON_SUBTITLE = 'Next 30 days';
 
 // Extract sx props to constants to prevent recreation on every render
 const titleTypographySx = { mb: 2.5 };
@@ -154,7 +160,7 @@ export const DashboardPage = () => {
       </Typography>
 
       <Grid container spacing={2.5}>
-        {/* License Statistics */}
+        {/* Key Metrics - Only show the most important stats */}
         <Grid item xs={12} sm={6} md={3}>
           <StatsCard
             title="Total Licenses"
@@ -173,84 +179,6 @@ export const DashboardPage = () => {
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
           <StatsCard
-            title="Expired Licenses"
-            value={stats.expiredLicenses}
-            icon={<ExpiredIcon />}
-            color="warning"
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatsCard
-            title="Free Trial Licenses"
-            value={stats.freeTrial}
-            icon={<FreeTrialIcon />}
-            color="info"
-          />
-        </Grid>
-
-        {/* Other Statistics */}
-        <Grid item xs={12} sm={6} md={3}>
-          <StatsCard
-            title="Total Activations"
-            value={stats.totalActivations}
-            icon={<ActivationIcon />}
-            color="info"
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatsCard
-            title="Active Activations"
-            value={stats.activeActivations || 0}
-            icon={<ActiveIcon />}
-            color="success"
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatsCard
-            title="Inactive Activations"
-            value={stats.inactiveActivations || 0}
-            icon={<InactiveIcon />}
-            color="warning"
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatsCard
-            title="Revoked Licenses"
-            value={stats.revokedLicenses || 0}
-            icon={<RevokedIcon />}
-            color="error"
-          />
-        </Grid>
-
-        {/* Subscription Statistics */}
-        <Grid item xs={12} sm={6} md={3}>
-          <StatsCard
-            title="Total Subscriptions"
-            value={stats.totalSubscriptions || 0}
-            icon={<SubscriptionIcon />}
-            color="info"
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatsCard
-            title="Active Subscriptions"
-            value={stats.activeSubscriptions}
-            icon={<SubscriptionIcon />}
-            color="success"
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatsCard
-            title="Expired Subscriptions"
-            value={stats.expiredSubscriptions || 0}
-            icon={<ExpiredIcon />}
-            color="warning"
-          />
-        </Grid>
-
-        {/* Revenue Statistics */}
-        <Grid item xs={12} sm={6} md={3}>
-          <StatsCard
             title="Total Revenue"
             value={formatCurrency(stats.totalRevenue)}
             icon={<RevenueIcon />}
@@ -266,23 +194,6 @@ export const DashboardPage = () => {
             color="success"
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatsCard
-            title="Expiring Soon"
-            value={stats.expiringSoon}
-            icon={<ExpiringIcon />}
-            color="warning"
-            subtitle={EXPIRING_SOON_SUBTITLE}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatsCard
-            title="Suspended Licenses"
-            value={stats.suspendedLicenses || 0}
-            icon={<SuspendedIcon />}
-            color="error"
-          />
-        </Grid>
 
         {/* Charts - Lazy loaded for better performance */}
         <Grid item xs={12} md={6}>
@@ -293,6 +204,38 @@ export const DashboardPage = () => {
         <Grid item xs={12} md={6}>
           <Suspense fallback={<LoadingSpinner />}>
             <RevenueChart initialRevenue={stats.initialRevenue} annualRevenue={stats.annualRevenue} />
+          </Suspense>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Suspense fallback={<LoadingSpinner />}>
+            <ActivationsChart 
+              total={stats.totalActivations}
+              active={stats.activeActivations || 0}
+              inactive={stats.inactiveActivations || 0}
+            />
+          </Suspense>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Suspense fallback={<LoadingSpinner />}>
+            <SubscriptionsChart 
+              total={stats.totalSubscriptions || 0}
+              active={stats.activeSubscriptions}
+              expired={stats.expiredSubscriptions || 0}
+            />
+          </Suspense>
+        </Grid>
+        
+        {/* Summary Stats Grid - Additional metrics in a compact view */}
+        <Grid item xs={12} md={6}>
+          <Suspense fallback={<LoadingSpinner />}>
+            <SummaryStatsGrid
+              expiredLicenses={stats.expiredLicenses}
+              freeTrial={stats.freeTrial}
+              revokedLicenses={stats.revokedLicenses || 0}
+              suspendedLicenses={stats.suspendedLicenses || 0}
+              inactiveActivations={stats.inactiveActivations || 0}
+              expiringSoon={stats.expiringSoon}
+            />
           </Suspense>
         </Grid>
 
