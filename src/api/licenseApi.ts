@@ -77,6 +77,13 @@ export const licenseApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: (_result, _error, id) => [{ type: 'License', id }, 'License', 'Stats'],
     }),
+    deleteLicense: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/admin/licenses/${id}/permanent`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: (_result, _error, id) => [{ type: 'License', id }, 'License', 'Stats'],
+    }),
     reactivateLicense: builder.mutation<
       { license: License; deactivatedActivations: number; message: string },
       number
@@ -137,6 +144,7 @@ export const {
   useCreateLicenseMutation,
   useUpdateLicenseMutation,
   useRevokeLicenseMutation,
+  useDeleteLicenseMutation,
   useReactivateLicenseMutation,
   useIncreaseUserLimitMutation,
   useLazyExportLicensesCSVQuery,

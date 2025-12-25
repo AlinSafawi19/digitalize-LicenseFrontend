@@ -21,8 +21,9 @@ import {
   Refresh as RefreshIcon,
   ContentCopy as CopyIcon,
   Check as CheckIcon,
+  Block as BlockIcon,
 } from '@mui/icons-material';
-import { useGetLicensesQuery, useRevokeLicenseMutation, useLazyExportLicensesCSVQuery } from '../../api/licenseApi';
+import { useGetLicensesQuery, useRevokeLicenseMutation, useDeleteLicenseMutation, useLazyExportLicensesCSVQuery } from '../../api/licenseApi';
 import { DataTable, Column } from '../../components/common/DataTable/DataTable';
 import { License, LicenseStatus } from '../../types/license.types';
 import { LicenseStatusBadge } from '../../components/license/LicenseStatusBadge';
@@ -48,6 +49,8 @@ const SUCCESS_COPIED = 'License key copied to clipboard';
 const ERROR_COPY_FAILED = 'Failed to copy license key';
 const SUCCESS_REVOKED = 'License revoked successfully';
 const ERROR_REVOKE_FAILED = 'Failed to revoke license. Please try again.';
+const SUCCESS_DELETED = 'License deleted permanently';
+const ERROR_DELETE_FAILED = 'Failed to delete license. Please try again.';
 const ERROR_EXPORT_FAILED = 'Failed to export CSV. Please try again.';
 const ERROR_LOADING_LICENSES = 'Failed to load licenses. Please try again.';
 
@@ -91,6 +94,8 @@ export const LicenseListPage = () => {
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [revokeDialogOpen, setRevokeDialogOpen] = useState(false);
   const [licenseToRevoke, setLicenseToRevoke] = useState<number | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [licenseToDelete, setLicenseToDelete] = useState<number | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
   const [sortBy] = useState('createdAt');
@@ -150,6 +155,7 @@ export const LicenseListPage = () => {
   const { data, isLoading, error } = useGetLicensesQuery(queryParams);
 
   const [revokeLicense] = useRevokeLicenseMutation();
+  const [deleteLicense] = useDeleteLicenseMutation();
   const [exportCSV] = useLazyExportLicensesCSVQuery();
 
   // Memoize handleRevokeClick to prevent recreation on every render
@@ -177,6 +183,33 @@ export const LicenseListPage = () => {
   const handleRevokeCancel = useCallback(() => {
     setRevokeDialogOpen(false);
     setLicenseToRevoke(null);
+  }, []);
+
+  // Memoize handleDeleteClick to prevent recreation on every render
+  const handleDeleteClick = useCallback((id: number) => {
+    setLicenseToDelete(id);
+    setDeleteDialogOpen(true);
+  }, []);
+
+  // Memoize handleDeleteConfirm to prevent recreation on every render
+  const handleDeleteConfirm = useCallback(async () => {
+    if (licenseToDelete === null) return;
+
+    try {
+      await deleteLicense(licenseToDelete).unwrap();
+      showToast(SUCCESS_DELETED, 'success');
+      setDeleteDialogOpen(false);
+      setLicenseToDelete(null);
+    } catch (err) {
+      console.error('Failed to delete license:', err);
+      showToast(ERROR_DELETE_FAILED, 'error');
+    }
+  }, [licenseToDelete, deleteLicense, showToast]);
+
+  // Memoize handleDeleteCancel to prevent recreation on every render
+  const handleDeleteCancel = useCallback(() => {
+    setDeleteDialogOpen(false);
+    setLicenseToDelete(null);
   }, []);
 
   // Memoize handleIncreaseUserLimitClick to prevent recreation on every render
@@ -364,13 +397,24 @@ export const LicenseListPage = () => {
             <RefreshIcon fontSize="small" />
           </IconButton>
         </Tooltip>
-        <Tooltip title="Revoke this license permanently. This action cannot be undone. The license will be marked as revoked and all activations will be deactivated.">
+        <Tooltip title="Revoke this license. The license will be marked as revoked and all activations will be deactivated. This is a soft delete and can be reactivated.">
+          <span>
+            <IconButton
+              size="small"
+              color="warning"
+              onClick={() => handleRevokeClick(row.id)}
+              disabled={row.status === 'revoked'}
+            >
+              <BlockIcon fontSize="small" />
+            </IconButton>
+          </span>
+        </Tooltip>
+        <Tooltip title="Delete this license permanently. This action cannot be undone. All license data will be permanently removed from the database.">
           <span>
             <IconButton
               size="small"
               color="error"
-              onClick={() => handleRevokeClick(row.id)}
-              disabled={row.status === 'revoked'}
+              onClick={() => handleDeleteClick(row.id)}
             >
               <DeleteIcon fontSize="small" />
             </IconButton>
@@ -385,6 +429,7 @@ export const LicenseListPage = () => {
       handleAddPayment,
       handleReactivateClick,
       handleRevokeClick,
+      handleDeleteClick,
     ]
   );
 
@@ -628,12 +673,23 @@ export const LicenseListPage = () => {
       <ConfirmDialog
         open={revokeDialogOpen}
         title="Revoke License"
-        message="Are you sure you want to revoke this license? This action cannot be undone. The license will be marked as revoked, all activations will be deactivated, and the customer will no longer be able to use the license."
+        message="Are you sure you want to revoke this license? The license will be marked as revoked, all activations will be deactivated, and the customer will no longer be able to use the license. This is a soft delete and the license can be reactivated later."
         confirmLabel="Revoke"
         cancelLabel="Cancel"
-        confirmColor="error"
+        confirmColor="warning"
         onConfirm={handleRevokeConfirm}
         onCancel={handleRevokeCancel}
+      />
+
+      <ConfirmDialog
+        open={deleteDialogOpen}
+        title="Delete License Permanently"
+        message="Are you sure you want to permanently delete this license? This action cannot be undone. All license data including activations, subscriptions, and payments will be permanently removed from the database."
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        confirmColor="error"
+        onConfirm={handleDeleteConfirm}
+        onCancel={handleDeleteCancel}
       />
 
     </Box>
