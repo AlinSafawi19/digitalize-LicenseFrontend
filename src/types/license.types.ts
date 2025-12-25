@@ -106,6 +106,8 @@ export interface UpdateLicenseInput {
   annualPrice?: number;
   pricePerUser?: number;
   isFreeTrial?: boolean;
+  startDate?: string;
+  endDate?: string;
 }
 
 /**

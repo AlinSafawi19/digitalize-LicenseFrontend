@@ -39,7 +39,7 @@ const ERROR_LICENSE_KEY_REQUIRED = 'License key is required';
 const ERROR_LICENSE_NOT_FOUND = 'License not found. Please enter a valid license key.';
 const ERROR_PAYMENT_TYPE_REQUIRED = 'Payment type is required';
 const ERROR_USER_QUANTITY_INVALID = 'Quantity of users must be greater than 0';
-const ERROR_AMOUNT_INVALID = 'Amount must be greater than 0';
+const ERROR_AMOUNT_INVALID = 'Amount must be 0 or greater';
 const ERROR_PAYMENT_DATE_INVALID = 'Invalid payment date';
 
 // Extract sx props to constants to prevent recreation on every render
@@ -239,7 +239,7 @@ export const PaymentCreatePage = () => {
       }
     }
 
-    if (!amount || parseFloat(amount) <= 0) {
+    if (amount === '' || isNaN(parseFloat(amount)) || parseFloat(amount) < 0) {
       newErrors.amount = ERROR_AMOUNT_INVALID;
     }
 
@@ -608,7 +608,7 @@ export const PaymentCreatePage = () => {
                 fullWidth
                 label="Amount"
                 type="number"
-                inputProps={{ min: 0.01, step: 0.01 }}
+                inputProps={{ min: 0, step: 0.01 }}
                 value={amount}
                 onChange={handleAmountChange}
                 error={!!errors.amount}

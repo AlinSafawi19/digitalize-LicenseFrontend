@@ -131,8 +131,9 @@ export const isExpiringSoon = (endDate: string | Date, days: number = 30): boole
 };
 
 /**
- * Convert date from date picker (local time) to UTC ISO string for API.
- * Assumes the date picker value is in Beirut timezone context.
+ * Convert date from date picker to UTC ISO string for API.
+ * Extracts date components (year, month, day) and treats them as Beirut timezone,
+ * then converts to UTC. This ensures consistent behavior regardless of browser timezone.
  *
  * Performance considerations:
  * - Early return for null/undefined avoids unnecessary processing
@@ -145,7 +146,13 @@ export const isExpiringSoon = (endDate: string | Date, days: number = 30): boole
 export const dateToUTCISOString = (date: Date | null | undefined): string | undefined => {
   if (!date) return undefined;
   try {
-    const beirutMoment = moment.tz(date, TIMEZONE);
+    // Extract date components (year, month, day) and create moment at start of day in Beirut timezone
+    // This ensures the date is interpreted as Beirut time, not browser local time
+    const year = date.getFullYear();
+    const month = date.getMonth(); // 0-indexed
+    const day = date.getDate();
+    // Create moment in Beirut timezone with the date components at start of day
+    const beirutMoment = moment.tz(TIMEZONE).year(year).month(month).date(day).startOf('day');
     return beirutMoment.utc().toISOString();
   } catch {
     return undefined;
