@@ -344,7 +344,7 @@ export const DashboardPage = () => {
         </Grid>
 
         {/* Recent Payments */}
-        <Grid item xs={12}>
+        <Grid item xs={12} md={6}>
           <Paper sx={sectionPaperSx}>
             <Typography variant="h6" sx={sectionTitleSx}>
               Recent Payments
@@ -419,7 +419,7 @@ export const DashboardPage = () => {
         </Grid>
 
         {/* Recent Activity */}
-        <Grid item xs={12}>
+        <Grid item xs={12} md={6}>
           <Paper sx={recentActivityPaperSx}>
             <Typography variant="h6" gutterBottom>
               Recent Activity (Last 7 days)
