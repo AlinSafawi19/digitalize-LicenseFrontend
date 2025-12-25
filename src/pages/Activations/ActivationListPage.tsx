@@ -105,10 +105,46 @@ export const ActivationListPage = () => {
     [navigate]
   );
 
+  // Memoize license navigation handler to prevent recreation on every render
+  const handleViewLicense = useCallback(
+    (licenseId: number) => {
+      navigate(routes.licenses.view(licenseId));
+    },
+    [navigate]
+  );
+
   // Memoize columns array to prevent recreation on every render
   // This is important since DataTable uses columns for rendering
   const columns: Column<Activation>[] = useMemo(
     () => [
+      {
+        id: 'licenseId',
+        label: 'License ID',
+        minWidth: 100,
+        align: 'center',
+        format: (value: unknown) => {
+          const licenseId = typeof value === 'number' ? value : Number(value);
+          return (
+            <Typography
+              variant="body2"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleViewLicense(licenseId);
+              }}
+              sx={{
+                cursor: 'pointer',
+                color: 'primary.main',
+                textDecoration: 'underline',
+                '&:hover': {
+                  color: 'primary.dark',
+                },
+              }}
+            >
+              {licenseId}
+            </Typography>
+          );
+        },
+      },
       {
         id: 'hardwareId',
         label: 'Hardware ID',
@@ -124,12 +160,6 @@ export const ActivationListPage = () => {
         label: 'Machine Name',
         minWidth: 150,
         format: (value: unknown) => (typeof value === 'string' ? value : value === null ? '-' : String(value ?? '-')),
-      },
-      {
-        id: 'licenseId',
-        label: 'License ID',
-        minWidth: 100,
-        align: 'center',
       },
       {
         id: 'activatedAt',
@@ -165,7 +195,7 @@ export const ActivationListPage = () => {
         ),
       },
     ],
-    [handleViewActivation]
+    [handleViewActivation, handleViewLicense]
   );
 
   // Memoize onChange handlers to prevent recreation on every render

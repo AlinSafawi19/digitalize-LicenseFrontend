@@ -8,8 +8,9 @@ import {
   Chip,
   IconButton,
   Button,
+  Paper,
 } from '@mui/material';
-import { Visibility as ViewIcon, FileDownload as ExportIcon, Add as AddIcon } from '@mui/icons-material';
+import { Visibility as ViewIcon, FileDownload as ExportIcon, Add as AddIcon, AttachMoney as MoneyIcon } from '@mui/icons-material';
 import { SingleInputDateRangeField } from '@mui/x-date-pickers-pro/SingleInputDateRangeField';
 import { useGetPaymentsQuery, useLazyExportPaymentsCSVQuery } from '../../api/paymentApi';
 import { DataTable, Column } from '../../components/common/DataTable/DataTable';
@@ -37,8 +38,36 @@ const typeOptions: { value: string; label: string }[] = [
 const headerBoxSx = { display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 };
 const buttonsBoxSx = { display: 'flex', gap: 2 };
 const filtersGridSx = { mb: 3 };
-const totalAmountBoxSx = { mb: 2 };
+const totalAmountBoxSx = { mb: 3 };
 const errorBoxSx = { mb: 2 };
+const totalAmountCardSx = {
+  p: 3,
+  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  color: 'white',
+  borderRadius: 2,
+  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
+  display: 'flex',
+  alignItems: 'center',
+  gap: 2,
+};
+const totalAmountIconSx = {
+  fontSize: 40,
+  opacity: 0.9,
+};
+const totalAmountContentSx = {
+  flex: 1,
+};
+const totalAmountLabelSx = {
+  fontSize: '0.875rem',
+  opacity: 0.9,
+  mb: 0.5,
+  fontWeight: 500,
+};
+const totalAmountValueSx = {
+  fontSize: '2rem',
+  fontWeight: 700,
+  lineHeight: 1.2,
+};
 
 export const PaymentListPage = () => {
   const navigate = useNavigate();
@@ -128,6 +157,14 @@ export const PaymentListPage = () => {
     [navigate]
   );
 
+  // Memoize license navigation handler to prevent recreation on every render
+  const handleViewLicense = useCallback(
+    (licenseId: number) => {
+      navigate(routes.licenses.view(licenseId));
+    },
+    [navigate]
+  );
+
   const handleCreatePayment = useCallback(() => {
     navigate(routes.payments.create);
   }, [navigate]);
@@ -141,6 +178,28 @@ export const PaymentListPage = () => {
         label: 'License ID',
         minWidth: 100,
         align: 'center',
+        format: (value: unknown) => {
+          const licenseId = typeof value === 'number' ? value : Number(value);
+          return (
+            <Typography
+              variant="body2"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleViewLicense(licenseId);
+              }}
+              sx={{
+                cursor: 'pointer',
+                color: 'primary.main',
+                textDecoration: 'underline',
+                '&:hover': {
+                  color: 'primary.dark',
+                },
+              }}
+            >
+              {licenseId}
+            </Typography>
+          );
+        },
       },
       {
         id: 'amount',
@@ -180,7 +239,7 @@ export const PaymentListPage = () => {
         ),
       },
     ],
-    [handleViewPayment]
+    [handleViewPayment, handleViewLicense]
   );
 
   // Memoize filter change handlers to prevent recreation on every render
@@ -263,11 +322,19 @@ export const PaymentListPage = () => {
         </Grid>
       </Grid>
 
-      {data?.meta?.totalAmount && (
+      {data?.meta?.totalAmount !== undefined && data?.meta?.totalAmount !== null && (
         <Box sx={totalAmountBoxSx}>
-          <Typography variant="h6" color="primary">
-            Total Amount: {formatCurrency(data.meta.totalAmount)}
-          </Typography>
+          <Paper elevation={3} sx={totalAmountCardSx}>
+            <MoneyIcon sx={totalAmountIconSx} />
+            <Box sx={totalAmountContentSx}>
+              <Typography variant="body2" sx={totalAmountLabelSx}>
+                Total Payment Amount
+              </Typography>
+              <Typography variant="h4" sx={totalAmountValueSx}>
+                {formatCurrency(data.meta.totalAmount)}
+              </Typography>
+            </Box>
+          </Paper>
         </Box>
       )}
 

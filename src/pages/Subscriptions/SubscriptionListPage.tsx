@@ -97,6 +97,14 @@ export const SubscriptionListPage = () => {
     [navigate]
   );
 
+  // Memoize license navigation handler to prevent recreation on every render
+  const handleViewLicense = useCallback(
+    (licenseId: number) => {
+      navigate(routes.licenses.view(licenseId));
+    },
+    [navigate]
+  );
+
   // Memoize filter change handler to prevent recreation on every render
   const handleStatusChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setStatusFilter(e.target.value);
@@ -124,6 +132,28 @@ export const SubscriptionListPage = () => {
         label: 'License ID',
         minWidth: 100,
         align: 'center',
+        format: (value: unknown) => {
+          const licenseId = typeof value === 'number' ? value : Number(value);
+          return (
+            <Typography
+              variant="body2"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleViewLicense(licenseId);
+              }}
+              sx={{
+                cursor: 'pointer',
+                color: 'primary.main',
+                textDecoration: 'underline',
+                '&:hover': {
+                  color: 'primary.dark',
+                },
+              }}
+            >
+              {licenseId}
+            </Typography>
+          );
+        },
       },
       {
         id: 'startDate',
@@ -194,7 +224,7 @@ export const SubscriptionListPage = () => {
         ),
       },
     ],
-    [handleViewSubscription, handleRenewClick]
+    [handleViewSubscription, handleRenewClick, handleViewLicense]
   );
 
   return (

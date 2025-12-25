@@ -5,12 +5,20 @@ export interface DashboardStats {
   activeLicenses: number;
   expiredLicenses: number;
   revokedLicenses: number;
+  suspendedLicenses: number;
   freeTrial: number; // Licenses in free trial
   totalActivations: number;
+  activeActivations: number;
+  inactiveActivations: number;
+  totalSubscriptions: number;
   activeSubscriptions: number;
+  expiredSubscriptions: number;
+  gracePeriodSubscriptions: number;
+  expiringSoonSubscriptions: number;
   totalRevenue: number;
   initialRevenue: number;
   annualRevenue: number;
+  monthlyRevenue: number;
   expiringSoon: number; // Licenses expiring in next 30 days
   recentActivity: {
     licenses: number;
@@ -75,12 +83,20 @@ export const statsApi = baseApi.injectEndpoints({
           activeLicenses: data.licenses.active,
           expiredLicenses: data.licenses.expired,
           revokedLicenses: data.licenses.revoked,
+          suspendedLicenses: data.licenses.suspended,
           freeTrial: data.licenses.freeTrial,
           totalActivations: data.activations.total,
+          activeActivations: data.activations.active,
+          inactiveActivations: data.activations.inactive,
+          totalSubscriptions: data.subscriptions.total,
           activeSubscriptions: data.subscriptions.active,
+          expiredSubscriptions: data.subscriptions.expired,
+          gracePeriodSubscriptions: data.subscriptions.gracePeriod,
+          expiringSoonSubscriptions: data.subscriptions.expiringSoon,
           totalRevenue: data.revenue.total,
           initialRevenue: data.revenue.byType.initial,
           annualRevenue: data.revenue.byType.subscription,
+          monthlyRevenue: data.revenue.monthly,
           expiringSoon: data.licenses.expiringSoon,
           recentActivity: {
             licenses: data.recentActivity.licenses,
