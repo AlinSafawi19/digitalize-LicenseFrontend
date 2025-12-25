@@ -109,7 +109,7 @@ function SidebarComponent({ mobileOpen, onMobileClose }: SidebarProps) {
           <Box sx={logoContainerSx}>
             <Box
               component="img"
-              src="/logo.svg"
+              src="https://downloads.digitalizepos.com/admin-panel-logo.svg"
               alt="DigitalizePOS Logo"
               onClick={handleLogoClick}
               sx={logoImageSx}
