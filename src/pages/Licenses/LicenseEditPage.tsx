@@ -8,6 +8,7 @@ import { LoadingSpinner } from '../../components/common/Loading/LoadingSpinner';
 import { ErrorMessage } from '../../components/common/Error/ErrorMessage';
 import { UpdateLicenseInput } from '../../types/license.types';
 import { routes } from '../../config/routes';
+import { utcDateStringToDate } from '../../utils/dateUtils';
 
 // Constants
 const REDIRECT_DELAY = 1500; // 1.5 seconds
@@ -96,8 +97,8 @@ export const LicenseEditPage = () => {
       locationName: license?.locationName || '',
       locationAddress: license?.locationAddress || '',
       isFreeTrial: license?.isFreeTrial || false,
-      startDate: license?.startDate || undefined,
-      endDate: license?.endDate || undefined,
+      startDate: license?.startDate ? utcDateStringToDate(license.startDate) || undefined : undefined,
+      endDate: license?.endDate ? utcDateStringToDate(license.endDate) || undefined : undefined,
     }),
     [license]
   );
