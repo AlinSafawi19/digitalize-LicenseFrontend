@@ -287,6 +287,7 @@ export const PaymentListPage = () => {
             value={typeFilter}
             onChange={handleTypeChange}
             variant="outlined"
+            sx={{ '& .MuiInputBase-root': { height: '56px' } }}
           >
             {typeOptions.map((option) => (
               <MenuItem key={option.value} value={option.value}>
@@ -303,6 +304,7 @@ export const PaymentListPage = () => {
             value={licenseIdFilter}
             onChange={handleLicenseIdChange}
             variant="outlined"
+            sx={{ '& .MuiInputBase-root': { height: '56px' } }}
           />
         </Grid>
         <Grid item xs={12} md={6}>
