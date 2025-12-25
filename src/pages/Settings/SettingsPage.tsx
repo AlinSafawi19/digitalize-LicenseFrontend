@@ -9,6 +9,7 @@ import {
   useChangePasswordMutation,
 } from '../../features/auth/slice/authApi';
 import { LoadingSpinner } from '../../components/common/Loading/LoadingSpinner';
+import { config } from '../../config/env';
 
 // Constants
 const SUCCESS_TIMEOUT = 3000; // 3 seconds
@@ -416,7 +417,7 @@ export const SettingsPage = () => {
                 <Typography variant="body2" color="text.secondary">
                   Version
                 </Typography>
-                <Typography variant="body1">1.0.0</Typography>
+                <Typography variant="body1">{config.appVersion}</Typography>
               </Grid>
               <Grid item xs={12} sm={6}>
                 <Typography variant="body2" color="text.secondary">

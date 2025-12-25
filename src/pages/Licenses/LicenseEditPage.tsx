@@ -92,8 +92,12 @@ export const LicenseEditPage = () => {
         license?.subscriptions && license.subscriptions.length > 0
           ? Number(license.subscriptions[0].annualFee)
           : DEFAULT_ANNUAL_PRICE,
+      pricePerUser: license ? Number(license.pricePerUser) : 0,
       locationName: license?.locationName || '',
       locationAddress: license?.locationAddress || '',
+      isFreeTrial: license?.isFreeTrial || false,
+      startDate: license?.startDate || undefined,
+      endDate: license?.endDate || undefined,
     }),
     [license]
   );

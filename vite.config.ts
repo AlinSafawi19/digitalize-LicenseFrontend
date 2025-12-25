@@ -1,10 +1,30 @@
-import { defineConfig } from 'vite';
+import { defineConfig, Plugin, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import { readFileSync } from 'fs';
+
+// Read package.json to get version
+const packageJson = JSON.parse(readFileSync('./package.json', 'utf-8'));
+
+// Plugin to inject package.json version as VITE_APP_VERSION
+const injectVersionPlugin = (): Plugin => {
+  const version = packageJson.version;
+  return {
+    name: 'inject-version',
+    config(config, { mode }) {
+      // Load existing env vars
+      const env = loadEnv(mode, process.cwd(), '');
+      // Set VITE_APP_VERSION from package.json if not already set in env file
+      if (!env.VITE_APP_VERSION && !process.env.VITE_APP_VERSION) {
+        process.env.VITE_APP_VERSION = version;
+      }
+    },
+  };
+};
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), injectVersionPlugin()],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

@@ -105,6 +105,7 @@ export interface UpdateLicenseInput {
   initialPrice?: number;
   annualPrice?: number;
   pricePerUser?: number;
+  isFreeTrial?: boolean;
 }
 
 /**
