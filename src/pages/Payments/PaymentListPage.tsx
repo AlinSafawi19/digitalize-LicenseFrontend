@@ -42,7 +42,7 @@ const totalAmountBoxSx = { mb: 3 };
 const errorBoxSx = { mb: 2 };
 const totalAmountCardSx = {
   p: 3,
-  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  bgcolor: 'primary.main',
   color: 'white',
   borderRadius: 2,
   boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
@@ -315,9 +315,10 @@ export const PaymentListPage = () => {
                 fullWidth: true,
                 variant: 'outlined' as const,
                 placeholder: 'Select date range',
+                size: 'medium' as const,
               },
             }}
-            sx={{ width: '100%' }}
+            sx={{ width: '100%', '& .MuiInputBase-root': { height: '56px' } }}
           />
         </Grid>
       </Grid>
