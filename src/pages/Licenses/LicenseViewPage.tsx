@@ -49,7 +49,26 @@ const ERROR_REACTIVATE_FAILED = 'Failed to reset license reactivation. Please tr
 
 // Extract sx props to constants to prevent recreation on every render
 const tabPanelBoxSx = { pt: 3 };
-const headerBoxSx = { display: 'flex', alignItems: 'center', gap: 2, mb: 3 };
+const headerBoxSx = { 
+  display: 'flex', 
+  flexDirection: { xs: 'column', sm: 'row' },
+  alignItems: { xs: 'flex-start', sm: 'center' },
+  gap: 2, 
+  mb: 3 
+};
+const headerTitleBoxSx = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: 2,
+  width: { xs: '100%', sm: 'auto' }
+};
+const headerButtonsBoxSx = {
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: 1,
+  width: { xs: '100%', sm: 'auto' },
+  justifyContent: { xs: 'flex-start', sm: 'flex-end' }
+};
 const flexGrowBoxSx = { flexGrow: 1 };
 const paperSx = { p: 3, mb: 3 };
 const licenseKeyBoxSx = { display: 'flex', alignItems: 'center', gap: 1, mb: 2 };
@@ -214,47 +233,71 @@ export const LicenseViewPage = () => {
   return (
     <Box>
       <Box sx={headerBoxSx}>
-        <IconButton onClick={handleBack}>
-          <BackIcon />
-        </IconButton>
-        <Typography variant="h4">License Details</Typography>
-        <Box sx={flexGrowBoxSx} />
-        <Tooltip title="Add a payment record for this license. This can be an initial payment, annual subscription payment, or user limit increase payment. Payments extend subscriptions and update license status.">
-          <span>
-            <Button variant="outlined" startIcon={<PaymentIcon />} onClick={handleAddPayment}>
-              Add Payment
-            </Button>
-          </span>
-        </Tooltip>
-        <Tooltip title="Edit license information (customer name, phone, location, prices). This does not affect existing subscriptions or payments.">
-          <span>
-            <Button variant="outlined" startIcon={<EditIcon />} onClick={handleEditLicense}>
-              Edit
-            </Button>
-          </span>
-        </Tooltip>
-        <Tooltip title="Reactivate this license by deactivating all existing activations. This allows the customer to re-enter their license key. All license data (subscriptions, payments, deadlines) will be preserved.">
-          <span>
-            <Button
-              variant="outlined"
-              color="primary"
-              startIcon={<RefreshIcon />}
-              onClick={handleOpenReactivateDialog}
-              disabled={isReactivating}
-            >
-              Reactivate
-            </Button>
-          </span>
-        </Tooltip>
-        {license.status !== 'revoked' && (
-          <Tooltip title="Revoke this license permanently. This action cannot be undone. The license will be marked as revoked, all activations will be deactivated, and the customer will no longer be able to use the license.">
+        <Box sx={headerTitleBoxSx}>
+          <IconButton onClick={handleBack}>
+            <BackIcon />
+          </IconButton>
+          <Typography variant="h4" sx={{ fontSize: { xs: '1.5rem', sm: '2.125rem' } }}>License Details</Typography>
+        </Box>
+        <Box sx={headerButtonsBoxSx}>
+          <Tooltip title="Add a payment record for this license. This can be an initial payment, annual subscription payment, or user limit increase payment. Payments extend subscriptions and update license status.">
             <span>
-              <Button variant="outlined" color="error" startIcon={<DeleteIcon />} onClick={handleOpenRevokeDialog}>
-                Revoke
+              <Button 
+                variant="outlined" 
+                startIcon={<PaymentIcon />} 
+                onClick={handleAddPayment}
+                size="small"
+                sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+              >
+                Add Payment
               </Button>
             </span>
           </Tooltip>
-        )}
+          <Tooltip title="Edit license information (customer name, phone, location, prices). This does not affect existing subscriptions or payments.">
+            <span>
+              <Button 
+                variant="outlined" 
+                startIcon={<EditIcon />} 
+                onClick={handleEditLicense}
+                size="small"
+                sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+              >
+                Edit
+              </Button>
+            </span>
+          </Tooltip>
+          <Tooltip title="Reactivate this license by deactivating all existing activations. This allows the customer to re-enter their license key. All license data (subscriptions, payments, deadlines) will be preserved.">
+            <span>
+              <Button
+                variant="outlined"
+                color="primary"
+                startIcon={<RefreshIcon />}
+                onClick={handleOpenReactivateDialog}
+                disabled={isReactivating}
+                size="small"
+                sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+              >
+                Reactivate
+              </Button>
+            </span>
+          </Tooltip>
+          {license.status !== 'revoked' && (
+            <Tooltip title="Revoke this license permanently. This action cannot be undone. The license will be marked as revoked, all activations will be deactivated, and the customer will no longer be able to use the license.">
+              <span>
+                <Button 
+                  variant="outlined" 
+                  color="error" 
+                  startIcon={<DeleteIcon />} 
+                  onClick={handleOpenRevokeDialog}
+                  size="small"
+                  sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                >
+                  Revoke
+                </Button>
+              </span>
+            </Tooltip>
+          )}
+        </Box>
       </Box>
 
       <Paper sx={paperSx}>

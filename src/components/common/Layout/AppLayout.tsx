@@ -2,6 +2,7 @@ import { ReactNode, useState, useCallback, memo, useEffect, useRef } from 'react
 import { Box, Container } from '@mui/material';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
+import { HealthBanner } from '../HealthBanner';
 import { useSessionExpiry } from '../../../hooks/useSessionExpiry';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../store';
@@ -20,6 +21,7 @@ const contentBoxSx = {
   flexDirection: 'column',
   width: { xs: '100%', md: 'calc(100% - 240px)' },
   minWidth: 0, // Prevents overflow on mobile
+  paddingBottom: '48px', // Space for health banner at bottom
 };
 const containerSx = {
   flexGrow: 1,
@@ -101,6 +103,7 @@ function AppLayoutComponent({ children }: AppLayoutProps) {
           {children}
         </Container>
       </Box>
+      <HealthBanner />
     </Box>
   );
 }

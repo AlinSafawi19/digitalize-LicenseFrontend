@@ -15,7 +15,41 @@ const COLORS = ['#1b5e20', '#e65100', '#c62828', '#616161'];
 
 // Extract sx props to constants to prevent recreation on every render
 const paperSx = { p: 3, height: '100%' };
-const chartBoxSx = { width: '100%', height: 300, mt: 2 };
+const chartBoxSx = { 
+  width: '100%', 
+  height: 300, 
+  mt: 2,
+  '& svg': {
+    outline: 'none',
+    '&:focus': {
+      outline: 'none',
+    },
+    '& *': {
+      outline: 'none',
+      '&:focus': {
+        outline: 'none',
+      },
+    },
+  },
+  '& path': {
+    outline: 'none',
+    '&:focus': {
+      outline: 'none',
+    },
+  },
+  '& .recharts-pie': {
+    outline: 'none',
+    '&:focus': {
+      outline: 'none',
+    },
+  },
+  '& .recharts-sector': {
+    outline: 'none',
+    '&:focus': {
+      outline: 'none',
+    },
+  },
+};
 
 function LicenseStatusChartComponent({ data }: LicenseStatusChartProps) {
   // Memoize chart data to prevent recreation on every render
@@ -43,7 +77,11 @@ function LicenseStatusChartComponent({ data }: LicenseStatusChartProps) {
       <Typography variant="h6" gutterBottom>
         License Status Distribution
       </Typography>
-      <Box sx={chartBoxSx}>
+      <Box 
+        sx={chartBoxSx}
+        tabIndex={-1}
+        onFocus={(e) => e.currentTarget.blur()}
+      >
         <ResponsiveContainer>
           <PieChart>
             <Pie

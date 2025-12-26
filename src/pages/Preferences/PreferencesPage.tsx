@@ -212,7 +212,7 @@ export const PreferencesPage = () => {
               variant="contained"
               startIcon={<SaveIcon />}
               onClick={handleSave}
-              disabled={isUpdating || !hasChanges}
+              disabled={isUpdating}
               sx={saveButtonSx}
             >
               {isUpdating ? 'Saving...' : 'Save Preferences'}
