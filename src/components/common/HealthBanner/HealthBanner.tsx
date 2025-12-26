@@ -1,4 +1,4 @@
-import { Box, Typography, Chip, Theme } from '@mui/material';
+import { Box, Typography, Chip, Theme, useTheme } from '@mui/material';
 import { useGetHealthQuery } from '../../../api/healthApi';
 import { memo } from 'react';
 
@@ -13,48 +13,29 @@ const bannerBoxSx = {
   borderColor: 'divider',
   py: 1,
   zIndex: 1000,
-  overflow: 'hidden',
-  '&::before': {
-    content: '""',
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background: (theme: Theme) => `linear-gradient(to right, ${theme.palette.background.paper} 0%, transparent 5%, transparent 95%, ${theme.palette.background.paper} 100%)`,
-    pointerEvents: 'none',
-    zIndex: 1,
-  },
-};
-
-const marqueeContainerSx = {
   display: 'flex',
-  width: '100%',
-  overflow: 'hidden',
+  justifyContent: 'center',
 };
 
-const marqueeBoxSx = {
+const getContentContainerSx = (theme: Theme) => ({
+  width: '100%',
+  maxWidth: `${theme.breakpoints.values.xl}px`, // Match Container maxWidth="xl"
+  px: { xs: 1.5, md: 2 }, // Match Container padding
+  mx: 'auto', // Center the content
+});
+
+const itemsContainerSx = {
   display: 'flex',
   alignItems: 'center',
-  gap: 0, // No gaps between items
-  animation: 'marquee 60s linear infinite',
-  '@keyframes marquee': {
-    '0%': {
-      transform: 'translateX(0)',
-    },
-    '100%': {
-      transform: 'translateX(-50%)',
-    },
-  },
-  width: 'max-content',
+  flexWrap: 'wrap',
+  gap: { xs: 1, md: 2 },
 };
 
 const healthItemSx = {
   display: 'flex',
   alignItems: 'center',
-  gap: 0, // No gaps
+  gap: 0.5,
   whiteSpace: 'nowrap',
-  flexShrink: 0,
 };
 
 const getStatusColor = (status: string): 'success' | 'error' | 'warning' => {
@@ -71,6 +52,9 @@ const getStatusColor = (status: string): 'success' | 'error' | 'warning' => {
 };
 
 function HealthBannerComponent() {
+  const theme = useTheme();
+  const contentContainerSx = getContentContainerSx(theme);
+  
   // Poll every 30 seconds to keep health status updated
   const { data: healthData, isLoading, error } = useGetHealthQuery(undefined, {
     pollingInterval: 30000,
@@ -89,13 +73,12 @@ function HealthBannerComponent() {
     const fallbackItems = [
       { name: 'Server Status', status: 'healthy' as const, message: 'Health endpoint unavailable' },
     ];
-    const healthItems = [...fallbackItems, ...fallbackItems];
     
     return (
       <Box sx={bannerBoxSx}>
-        <Box sx={marqueeContainerSx}>
-          <Box sx={marqueeBoxSx}>
-            {healthItems.map((item, index) => (
+        <Box sx={contentContainerSx}>
+          <Box sx={itemsContainerSx}>
+            {fallbackItems.map((item, index) => (
               <Box key={`${item.name}-${index}`} sx={healthItemSx}>
                 <Typography variant="body2" component="span" sx={{ fontWeight: 600 }}>
                   {item.name}:
@@ -111,9 +94,11 @@ function HealthBannerComponent() {
                     {item.message}
                   </Typography>
                 )}
-                <Typography variant="body2" component="span" sx={{ mx: 1, color: 'text.secondary' }}>
-                  •
-                </Typography>
+                {index < fallbackItems.length - 1 && (
+                  <Typography variant="body2" component="span" sx={{ mx: 0.5, color: 'text.secondary' }}>
+                    •
+                  </Typography>
+                )}
               </Box>
             ))}
           </Box>
@@ -126,7 +111,7 @@ function HealthBannerComponent() {
     // Show loading state instead of nothing
     return (
       <Box sx={bannerBoxSx}>
-        <Box sx={{ px: 2 }}>
+        <Box sx={contentContainerSx}>
           <Typography variant="body2" color="text.secondary">
             Loading health status...
           </Typography>
@@ -140,13 +125,12 @@ function HealthBannerComponent() {
     const fallbackItems = [
       { name: 'Server Status', status: 'healthy' as const, message: 'No health data available' },
     ];
-    const healthItems = [...fallbackItems, ...fallbackItems];
     
     return (
       <Box sx={bannerBoxSx}>
-        <Box sx={marqueeContainerSx}>
-          <Box sx={marqueeBoxSx}>
-            {healthItems.map((item, index) => (
+        <Box sx={contentContainerSx}>
+          <Box sx={itemsContainerSx}>
+            {fallbackItems.map((item, index) => (
               <Box key={`${item.name}-${index}`} sx={healthItemSx}>
                 <Typography variant="body2" component="span" sx={{ fontWeight: 600 }}>
                   {item.name}:
@@ -162,9 +146,11 @@ function HealthBannerComponent() {
                     {item.message}
                   </Typography>
                 )}
-                <Typography variant="body2" component="span" sx={{ mx: 1, color: 'text.secondary' }}>
-                  •
-                </Typography>
+                {index < fallbackItems.length - 1 && (
+                  <Typography variant="body2" component="span" sx={{ mx: 0.5, color: 'text.secondary' }}>
+                    •
+                  </Typography>
+                )}
               </Box>
             ))}
           </Box>
@@ -173,13 +159,13 @@ function HealthBannerComponent() {
     );
   }
 
-  // Duplicate the health items for seamless marquee loop
-  const healthItems = [...healthData.health, ...healthData.health];
+  // Display health items without marquee
+  const healthItems = healthData.health;
 
   return (
     <Box sx={bannerBoxSx}>
-      <Box sx={marqueeContainerSx}>
-        <Box sx={marqueeBoxSx}>
+      <Box sx={contentContainerSx}>
+        <Box sx={itemsContainerSx}>
           {healthItems.map((item, index) => (
             <Box key={`${item.name}-${index}`} sx={healthItemSx}>
               <Typography variant="body2" component="span" sx={{ fontWeight: 600 }}>
@@ -196,9 +182,11 @@ function HealthBannerComponent() {
                   {item.message}
                 </Typography>
               )}
-              <Typography variant="body2" component="span" sx={{ mx: 0.5, color: 'text.secondary' }}>
-                •
-              </Typography>
+              {index < healthItems.length - 1 && (
+                <Typography variant="body2" component="span" sx={{ mx: 0.5, color: 'text.secondary' }}>
+                  •
+                </Typography>
+              )}
             </Box>
           ))}
         </Box>
