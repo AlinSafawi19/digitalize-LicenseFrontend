@@ -1,5 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { baseApi } from '../api/baseApi';
+import { healthApi } from '../api/healthApi';
 import authReducer from '../features/auth/slice/authSlice';
 
 /**
@@ -19,6 +20,7 @@ export const store = configureStore({
   reducer: {
     auth: authReducer,
     [baseApi.reducerPath]: baseApi.reducer,
+    [healthApi.reducerPath]: healthApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -35,7 +37,7 @@ export const store = configureStore({
       immutableCheck: {
         warnAfter: 128, // Only warn after 128ms to reduce overhead
       },
-    }).concat(baseApi.middleware),
+    }).concat(baseApi.middleware, healthApi.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;
