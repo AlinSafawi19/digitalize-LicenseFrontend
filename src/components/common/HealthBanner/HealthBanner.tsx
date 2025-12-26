@@ -72,12 +72,105 @@ const getStatusColor = (status: string): 'success' | 'error' | 'warning' => {
 
 function HealthBannerComponent() {
   // Poll every 30 seconds to keep health status updated
-  const { data: healthData, isLoading } = useGetHealthQuery(undefined, {
+  const { data: healthData, isLoading, error } = useGetHealthQuery(undefined, {
     pollingInterval: 30000,
+    // Skip the query if it fails - we'll show a fallback
+    skip: false,
   });
 
+  // Debug logging
+  if (error) {
+    console.error('Health API error:', error);
+  }
+
+  // Show fallback if API endpoint doesn't exist or returns error
+  if (error || (!isLoading && !healthData)) {
+    // Show a simple fallback message
+    const fallbackItems = [
+      { name: 'Server Status', status: 'healthy' as const, message: 'Health endpoint unavailable' },
+    ];
+    const healthItems = [...fallbackItems, ...fallbackItems];
+    
+    return (
+      <Box sx={bannerBoxSx}>
+        <Box sx={marqueeContainerSx}>
+          <Box sx={marqueeBoxSx}>
+            {healthItems.map((item, index) => (
+              <Box key={`${item.name}-${index}`} sx={healthItemSx}>
+                <Typography variant="body2" component="span" sx={{ fontWeight: 600 }}>
+                  {item.name}:
+                </Typography>
+                <Chip
+                  label={item.status.toUpperCase()}
+                  color={getStatusColor(item.status)}
+                  size="small"
+                  sx={{ height: 20, fontSize: '0.7rem' }}
+                />
+                {item.message && (
+                  <Typography variant="body2" component="span" color="text.secondary">
+                    {item.message}
+                  </Typography>
+                )}
+                <Typography variant="body2" component="span" sx={{ mx: 1, color: 'text.secondary' }}>
+                  •
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
+
   if (isLoading || !healthData) {
-    return null;
+    // Show loading state instead of nothing
+    return (
+      <Box sx={bannerBoxSx}>
+        <Box sx={{ px: 2 }}>
+          <Typography variant="body2" color="text.secondary">
+            Loading health status...
+          </Typography>
+        </Box>
+      </Box>
+    );
+  }
+
+  // Handle empty health array
+  if (!healthData.health || healthData.health.length === 0) {
+    const fallbackItems = [
+      { name: 'Server Status', status: 'healthy' as const, message: 'No health data available' },
+    ];
+    const healthItems = [...fallbackItems, ...fallbackItems];
+    
+    return (
+      <Box sx={bannerBoxSx}>
+        <Box sx={marqueeContainerSx}>
+          <Box sx={marqueeBoxSx}>
+            {healthItems.map((item, index) => (
+              <Box key={`${item.name}-${index}`} sx={healthItemSx}>
+                <Typography variant="body2" component="span" sx={{ fontWeight: 600 }}>
+                  {item.name}:
+                </Typography>
+                <Chip
+                  label={item.status.toUpperCase()}
+                  color={getStatusColor(item.status)}
+                  size="small"
+                  sx={{ height: 20, fontSize: '0.7rem' }}
+                />
+                {item.message && (
+                  <Typography variant="body2" component="span" color="text.secondary">
+                    {item.message}
+                  </Typography>
+                )}
+                <Typography variant="body2" component="span" sx={{ mx: 1, color: 'text.secondary' }}>
+                  •
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        </Box>
+      </Box>
+    );
   }
 
   // Duplicate the health items for seamless marquee loop

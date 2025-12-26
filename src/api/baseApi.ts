@@ -30,12 +30,12 @@ const baseQueryWithAuth = fetchBaseQuery({
     const state = getState() as RootState;
     const { token, tokenExpiry } = state.auth;
 
-    // Check if this is a login endpoint
+    // Check if this is a login or health endpoint (no auth required)
     // RTK Query endpoint names follow pattern: 'api/endpointName' or 'reducerPath/endpointName'
     // For injected endpoints from authApi, it might be 'api/login' or similar
     // Performance: Only check if endpoint is a string (most common case)
-    if (typeof endpoint === 'string' && endpoint.toLowerCase().includes('login')) {
-      // Remove any existing authorization header for login endpoints
+    if (typeof endpoint === 'string' && (endpoint.toLowerCase().includes('login') || endpoint.toLowerCase().includes('health'))) {
+      // Remove any existing authorization header for login/health endpoints
       headers.delete('authorization');
       headers.delete('Authorization');
       return headers;
