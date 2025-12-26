@@ -1,4 +1,4 @@
-import { Box, Typography, Chip } from '@mui/material';
+import { Box, Typography, Chip, Theme } from '@mui/material';
 import { useGetHealthQuery } from '../../../api/healthApi';
 import { memo } from 'react';
 
@@ -21,7 +21,7 @@ const bannerBoxSx = {
     left: 0,
     right: 0,
     bottom: 0,
-    background: (theme) => `linear-gradient(to right, ${theme.palette.background.paper} 0%, transparent 5%, transparent 95%, ${theme.palette.background.paper} 100%)`,
+    background: (theme: Theme) => `linear-gradient(to right, ${theme.palette.background.paper} 0%, transparent 5%, transparent 95%, ${theme.palette.background.paper} 100%)`,
     pointerEvents: 'none',
     zIndex: 1,
   },
@@ -71,7 +71,10 @@ const getStatusColor = (status: string): 'success' | 'error' | 'warning' => {
 };
 
 function HealthBannerComponent() {
-  const { data: healthData, isLoading } = useGetHealthQuery();
+  // Poll every 30 seconds to keep health status updated
+  const { data: healthData, isLoading } = useGetHealthQuery(undefined, {
+    pollingInterval: 30000,
+  });
 
   if (isLoading || !healthData) {
     return null;

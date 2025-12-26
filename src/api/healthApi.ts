@@ -22,8 +22,6 @@ export const healthApi = baseApi.injectEndpoints({
     getHealth: builder.query<HealthResponse['data'], void>({
       query: () => '/health',
       providesTags: ['Health'],
-      // Poll every 30 seconds to keep health status updated
-      pollingInterval: 30000,
       // Keep data for 1 minute
       keepUnusedDataFor: 60,
       transformResponse: (response: HealthResponse): HealthResponse['data'] => {

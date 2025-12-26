@@ -69,7 +69,6 @@ const headerButtonsBoxSx = {
   width: { xs: '100%', sm: 'auto' },
   justifyContent: { xs: 'flex-start', sm: 'flex-end' }
 };
-const flexGrowBoxSx = { flexGrow: 1 };
 const paperSx = { p: 3, mb: 3 };
 const licenseKeyBoxSx = { display: 'flex', alignItems: 'center', gap: 1, mb: 2 };
 const licenseKeyTypographySx = { fontFamily: 'monospace', flexGrow: 1 };
