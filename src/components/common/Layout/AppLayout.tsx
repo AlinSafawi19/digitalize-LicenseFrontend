@@ -102,8 +102,8 @@ function AppLayoutComponent({ children }: AppLayoutProps) {
         <Container maxWidth="xl" sx={containerSx}>
           {children}
         </Container>
+        <HealthBanner />
       </Box>
-      <HealthBanner />
     </Box>
   );
 }

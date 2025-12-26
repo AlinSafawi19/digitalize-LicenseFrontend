@@ -6,7 +6,7 @@ import { memo } from 'react';
 const bannerBoxSx = {
   position: 'fixed',
   bottom: 0,
-  left: 0,
+  left: { xs: 0, md: '240px' }, // Account for sidebar width on desktop
   right: 0,
   backgroundColor: 'background.paper',
   borderTop: '1px solid',
@@ -36,7 +36,7 @@ const marqueeContainerSx = {
 const marqueeBoxSx = {
   display: 'flex',
   alignItems: 'center',
-  gap: 3,
+  gap: 0, // No gaps between items
   animation: 'marquee 60s linear infinite',
   '@keyframes marquee': {
     '0%': {
@@ -52,7 +52,7 @@ const marqueeBoxSx = {
 const healthItemSx = {
   display: 'flex',
   alignItems: 'center',
-  gap: 1,
+  gap: 0, // No gaps
   whiteSpace: 'nowrap',
   flexShrink: 0,
 };
@@ -196,7 +196,7 @@ function HealthBannerComponent() {
                   {item.message}
                 </Typography>
               )}
-              <Typography variant="body2" component="span" sx={{ mx: 1, color: 'text.secondary' }}>
+              <Typography variant="body2" component="span" sx={{ mx: 0.5, color: 'text.secondary' }}>
                 •
               </Typography>
             </Box>
